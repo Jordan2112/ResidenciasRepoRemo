@@ -16,86 +16,125 @@ namespace VisualizacionArchivos
 {
     public partial class Form1 : Form
     {
-        private string archivoZip;
+        private string rutaCarpeta = @"C:\Users\Lopezadri\Desktop\Expedientes\";
         public Form1()
         {
             InitializeComponent();
             
         }
 
-        private void btnMostrar_Click(object sender, EventArgs e)
+       
+        private void contenidoCarpeta()
         {
-            OpenFileDialog op = new OpenFileDialog();
-
-            op.Title = "Selccione un archivo";
-            op.Filter = "Archivos PDF|*.pdf| Todos los archivos|*.*";
-
-            if(op.ShowDialog() == DialogResult.OK)
-            { 
-                archivoZip = op.FileName;
-
-                using (ZipFile zip = new ZipFile(archivoZip))
-                {
-                    dataGridView1.Rows.Clear();
-
-                    foreach(ZipEntry entry in zip)
-                    {
-                        DataGridViewRow row = new DataGridViewRow();
-                        row.CreateCells(dataGridView1);
-                        row.Cells[0].Value = entry.Name;
-                        row.Cells[1].Value = entry.Size;
-
-                        dataGridView1.Rows.Add(row);
-                       
-
-                    }
-
-
-                };
-               
-            }
-
-        }
-
-        private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            string nombreArchivo = textBox1.Text.Trim();
-
-
-
-        }
-
-        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if(e.RowIndex >= 0) 
+            if(Directory.Exists(rutaCarpeta))
             {
-                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-                string nombre = row.Cells[0].Value.ToString();
+                string[] documentos = Directory.GetFiles(rutaCarpeta);
 
-                using (ZipFile zipfile = new ZipFile(archivoZip))
-                {
-                    ZipEntry entry = zipfile.GetEntry(nombre);
-                    if (entry != null)
+                foreach( string documento in documentos ) 
+                { 
+                    FileInfo fileInfo = new FileInfo(documento);
+                   dataGridView1.Rows.Add(new object[] 
+                   { 
+                      fileInfo.Name,
+                      
+                   });
+                   
+                }
+            }
+            else
+            {
+                MessageBox.Show("La carpeta no existe");
+            }
+        }
+
+        private void contenidoZip()
+        {
+            //string rutazip = rutaCarpeta += txtDato.Text;
+            string ruta = label1.Text;
+            Console.WriteLine(ruta);
+            try
+            {
+                using (FileStream archivoStream =  new FileStream(ruta, FileMode.Open, FileAccess.Read))
+                    using(ZipInputStream zipStream =  new ZipInputStream(archivoStream))
                     {
-                        using (StreamReader reader = new StreamReader(zipfile.GetInputStream(entry)))
-                        {
-                            string contenido = reader.ReadToEnd();
+                        ZipEntry entrada;
+                        while ((entrada = zipStream.GetNextEntry()) != null)
+                        {   
+                            string nombreArchivo = entrada.Name;
 
-                            webBrowser1.Navigate(contenido);
+                           
 
+                            if (dataGridView2.Rows.Count > 0 ) 
+                            {
+                                dataGridView2.Rows.Add(nombreArchivo);
+                            }
+                            else
+                            {
+                                if(dataGridView2.Rows.Count == 1 )
+                                {
+                                    dataGridView3.Rows.Add(nombreArchivo);
+                                }
+                                
+                            }
+                              
 
-                        };
-                    
+                        }
+
                     }
+               
 
-                };
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show("Error al acceder al archivo zip" );
+            
             
             }
+
+        }
+
+        private void dataGridView1_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            txtDato.Text = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+            label1.Text = rutaCarpeta + txtDato.Text;
+            
+        }
+
+        private void btnMostrar_Click(object sender, EventArgs e)
+        {
+            
+
+              contenidoCarpeta();
+               
+
+
+           
+            
+        }
+
+        private void btnAcceso_Click(object sender, EventArgs e)
+        {
+            contenidoZip();
+            
+            txtDato.Text = "";
+           
+
+        }
+
+        private void dataGridView3_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void dataGridView3_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            
+        }
+
+        private void dataGridView2_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            txtDato.Text = dataGridView2.CurrentRow.Cells[0].Value.ToString();
+            label1.Text += @"\" + txtDato.Text;
         }
     }
 }
