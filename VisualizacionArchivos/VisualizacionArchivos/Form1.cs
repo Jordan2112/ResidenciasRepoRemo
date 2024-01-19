@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.IO.Compression;
 using ICSharpCode.SharpZipLib.Zip;
+using ICSharpCode.SharpZipLib.Core;
 
 namespace VisualizacionArchivos
 {
@@ -70,10 +71,7 @@ namespace VisualizacionArchivos
                             }
                             else
                             {
-                                if(dataGridView2.Rows.Count == 1 )
-                                {
-                                    dataGridView3.Rows.Add(nombreArchivo);
-                                }
+                               
                                 
                             }
                               
@@ -135,6 +133,115 @@ namespace VisualizacionArchivos
         {
             txtDato.Text = dataGridView2.CurrentRow.Cells[0].Value.ToString();
             label1.Text += @"\" + txtDato.Text;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            //if (openFileDialog.ShowDialog() == DialogResult.OK)
+            //{
+            //    string archivoExistente = label1.Text;
+            //    string archivoNuevo = openFileDialog.FileName;
+
+            //    try
+            //    {
+            //        // Crear un nombre temporal para el nuevo archivo ZIP
+            //        string archivoTemporal = Path.GetTempFileName();
+
+            //        // Abrir el archivo ZIP existente
+            //        using (FileStream archivoZipExistente = new FileStream(archivoExistente, FileMode.Open))
+            //        using (FileStream nuevoArchivo = new FileStream(archivoNuevo, FileMode.Open))
+            //        using (ZipFile zip = new ZipFile(archivoZipExistente))
+            //        {
+            //            // Crear un nuevo archivo ZIP temporal
+            //            using (FileStream archivoTemporalStream = new FileStream(archivoTemporal, FileMode.Create))
+            //            using (ZipOutputStream zipOutputStream = new ZipOutputStream(archivoTemporalStream))
+            //            {
+            //                // Copiar las entradas existentes al nuevo archivo ZIP
+            //                foreach (ZipEntry entradaExistente in zip)
+            //                {
+            //                    zipOutputStream.PutNextEntry(entradaExistente);
+            //                    StreamUtils.Copy(zip.GetInputStream(entradaExistente), zipOutputStream, new byte[4096]);
+            //                    zipOutputStream.CloseEntry();
+            //                }
+
+            //                // Agregar la nueva entrada al nuevo archivo ZIP
+            //                ZipEntry nuevaEntrada = new ZipEntry(Path.GetFileName(archivoNuevo));
+            //                zipOutputStream.PutNextEntry(nuevaEntrada);
+            //                StreamUtils.Copy(nuevoArchivo, zipOutputStream, new byte[4096]);
+            //                zipOutputStream.CloseEntry();
+            //            }
+            //        }
+
+            //        // Reemplazar el archivo ZIP existente con el nuevo archivo ZIP temporal
+            //        File.Copy(archivoTemporal, archivoExistente, true);
+
+            //        // Eliminar el archivo ZIP temporal
+            //        File.Delete(archivoTemporal);
+
+            //        MessageBox.Show("Archivo anexado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    }
+            //}
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string archivoExistente = label1.Text;
+                string archivoNuevo = openFileDialog.FileName;
+
+                try
+                {
+                    // Crear un nuevo archivo ZIP temporal
+                    string archivoTemporal = Path.GetTempFileName();
+
+                    using (FileStream archivoTemporalStream = new FileStream(archivoTemporal, FileMode.Create))
+                    using (ZipOutputStream zipOutputStream = new ZipOutputStream(archivoTemporalStream))
+                    {
+                        using (FileStream archivoZipExistente = new FileStream(archivoExistente, FileMode.Open))
+                        {
+                            using (ZipFile zipFile = new ZipFile(archivoZipExistente))
+                            {
+                                // Copiar las entradas existentes al nuevo archivo ZIP
+                                foreach (ZipEntry entradaExistente in zipFile)
+                                {
+                                    zipOutputStream.PutNextEntry(entradaExistente);
+                                    zipFile.GetInputStream(entradaExistente).CopyTo(zipOutputStream);
+                                    zipOutputStream.CloseEntry();
+                                }
+                            }
+                        }
+
+                        // Agregar la nueva entrada al nuevo archivo ZIP
+                        using (FileStream nuevoArchivo = new FileStream(archivoNuevo, FileMode.Open))
+                        {
+                            ZipEntry nuevaEntrada = new ZipEntry(Path.GetFileName(archivoNuevo));
+                            zipOutputStream.PutNextEntry(nuevaEntrada);
+                            nuevoArchivo.CopyTo(zipOutputStream);
+                            zipOutputStream.CloseEntry();
+                        }
+                    }
+
+                    // Reemplazar el archivo ZIP existente con el nuevo archivo ZIP temporal
+                    File.Copy(archivoTemporal, archivoExistente, true);
+
+                    // Eliminar el archivo ZIP temporal
+                    File.Delete(archivoTemporal);
+
+                    MessageBox.Show("Archivo anexado con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+
+
         }
     }
 }
