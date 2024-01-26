@@ -95,6 +95,7 @@ namespace VisualizacionArchivos
         {
             txtDato.Text = dataGridView1.CurrentRow.Cells[0].Value.ToString();
             label1.Text = rutaCarpeta + txtDato.Text;
+           
             
         }
 
@@ -133,6 +134,9 @@ namespace VisualizacionArchivos
         {
             txtDato.Text = dataGridView2.CurrentRow.Cells[0].Value.ToString();
             label1.Text += @"\" + txtDato.Text;
+
+            
+
         }
 
         private void button1_Click(object sender, EventArgs e)
