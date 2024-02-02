@@ -60,9 +60,7 @@ namespace LOPEZADRI_FILE_MANAGER
             else
             {
                 DataTable dataTable = fileInfo.ConvertListToDataTableZip2(fileListZip);
-                Form2 form2 = new Form2();
-                form2.SetDataSource(dataTable);
-                form2.ShowDialog();
+               
 
             }
 
