@@ -90,13 +90,14 @@ namespace LOPEZADRI_FILE_MANAGER.Models
             return dataTable;
         }
 
-        public static List<fileInfo> ExtractZipContents(string zipFilePath) 
+        public static List<fileInfo> ExtractZipContents(string zipFilePath)
         {
             List<fileInfo> fileContentZip = new List<fileInfo>();
 
-           
+            try
+            {
                 // Crear un directorio de extracción en el directorio de trabajo actual
-                string extractionDirectory = Path.Combine(Environment.CurrentDirectory, "Extraccion");
+                string extractionDirectory = Path.Combine(Environment.CurrentDirectory, "Extraccion2");
                 Directory.CreateDirectory(extractionDirectory);
 
                 // Extraer el contenido del archivo ZIP
@@ -104,28 +105,51 @@ namespace LOPEZADRI_FILE_MANAGER.Models
 
                 // Obtener la lista de archivos extraídos
                 string[] extractedFilePaths = Directory.GetFiles(extractionDirectory);
+
                 foreach (string filePath in extractedFilePaths)
                 {
-                    fileInfo fileInfo = new fileInfo
+                    // Verificar si el archivo es otro ZIP antes de intentar extraerlo
+                    if (Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase))
                     {
-                        nameFile = Path.GetFileName(filePath),
-                        lastModification = File.GetLastWriteTime(filePath),
-                        filePath = filePath
-
-                    };
-                    fileContentZip.Add(fileInfo);
+                        // Verificar si el archivo ZIP secundario existe antes de intentar extraerlo
+                        if (File.Exists(filePath))
+                        {
+                            // Recursivamente extraer el contenido del archivo ZIP secundario
+                            fileContentZip.AddRange(ExtractZipContents(filePath));
+                        }
+                        else
+                        {
+                            Console.WriteLine($"El archivo ZIP secundario no existe: {filePath}");
+                        }
+                    }
+                    else
+                    {
+                        fileInfo fileInfo = new fileInfo
+                        {
+                            nameFile = Path.GetFileName(filePath),
+                            lastModification = File.GetLastWriteTime(filePath),
+                            filePath = filePath
+                        };
+                        fileContentZip.Add(fileInfo);
+                    }
                 }
 
-               return fileContentZip;
-           
-
+                return fileContentZip;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al extraer archivos ZIP: " + ex.Message);
+                return fileContentZip; // Devuelve la lista vacía en caso de error
+            }
         }
+
+
 
         public static DataTable ConvertListToDataTableZip2(List<fileInfo> fileList)
         {
             DataTable dataTable = new DataTable();
             dataTable.Columns.Add("Nombre");
-           \
+           
             dataTable.Columns.Add("Ruta");
 
             foreach (fileInfo fileInfo in fileList)
