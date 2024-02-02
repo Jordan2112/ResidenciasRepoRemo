@@ -25,15 +25,10 @@ namespace Diseño
         [DllImport("user32.dll")]
         private static extern bool ReleaseCapture();
 
-
-
-
-
-
-
         private string rutaCarpeta = @"C:\Users\Lopezadri\Desktop\Expedientes\";
         public Form1()
         {
+          
             InitializeComponent();
             panel1.MouseDown += panel1_MouseDown;
 
@@ -125,55 +120,18 @@ namespace Diseño
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == dataGridView1.Columns[""].Index)
+            dataGridView1.CellContentClick += dataGridView1_CellContentClick;
+
+            // Verifica si se hizo clic en la columna de botones (puedes especificar el índice de la columna)
+            if (e.ColumnIndex == dataGridView1.Columns[" "].Index && e.RowIndex >= 0)
             {
-                // Obtén el valor de la celda (botón)
-                string action = dataGridView1.Rows[e.RowIndex].Cells[""].Value.ToString();
-
-                // Realiza la acción según el contenido del botón
-                if (action == "Consultar")
-                {
-                    string ruta = rutaCarpeta + @"\" + dataGridView1.Columns["Nombre"].Index;
-                    try
-                    {
-                        using (FileStream archivoStream = new FileStream(ruta, FileMode.Open, FileAccess.Read))
-                        using (ZipInputStream zipStream = new ZipInputStream(archivoStream))
-                        {
-                            ZipEntry entrada;
-                            while ((entrada = zipStream.GetNextEntry()) != null)
-                            {
-                                string nombreArchivo = entrada.Name;
-
-
-
-                                if (dataGridView2.Rows.Count > 0)
-                                {
-                                    dataGridView2.Rows.Add(nombreArchivo);
-                                }
-                                else
-                                {
-
-
-                                }
-
-
-                            }
-
-                        }
-
-
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error al acceder al archivo zip");
-
-
-                    }
-
-
-                }
-               
+                // Se hizo clic en el botón de la celda específica
+                // Realiza la acción que desees aquí
+                MessageBox.Show("Botón clicado en la fila " + e.RowIndex.ToString());
             }
+
+
+
         }
     }
 }

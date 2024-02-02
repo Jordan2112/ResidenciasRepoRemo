@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOPEZADRI FILE MANAGER", "LOPEZADRI FILE MANAGER\LOPEZADRI FILE MANAGER.csproj", "{D7B505FD-3D57-4568-A4C9-733F02081956}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D7B505FD-3D57-4568-A4C9-733F02081956}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7B505FD-3D57-4568-A4C9-733F02081956}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7B505FD-3D57-4568-A4C9-733F02081956}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7B505FD-3D57-4568-A4C9-733F02081956}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE0C3929-6F99-432C-9972-4620BBB3B951}
+	EndGlobalSection
+EndGlobal
