@@ -132,6 +132,8 @@ namespace LOPEZADRI_FILE_MANAGER
                     {
                         // El contenido de la celda actual termina en ".zip"
                         string? pathZip = pathComplete + @"\" +  cellValue.ToString();
+
+
                         MessageBox.Show(pathZip);
                         fileListZip = new List<fileInfo>();
 

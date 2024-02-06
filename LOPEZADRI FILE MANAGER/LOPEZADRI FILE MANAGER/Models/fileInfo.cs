@@ -97,40 +97,33 @@ namespace LOPEZADRI_FILE_MANAGER.Models
             try
             {
                 // Crear un directorio de extracción en el directorio de trabajo actual
-                string extractionDirectory = Path.Combine(Environment.CurrentDirectory, "Extraccion2");
+                string extractionDirectory = Path.Combine(Environment.CurrentDirectory, "ZIPS");
                 Directory.CreateDirectory(extractionDirectory);
 
-                // Extraer el contenido del archivo ZIP
-                ZipFile.ExtractToDirectory(zipFilePath, extractionDirectory);
-
-                // Obtener la lista de archivos extraídos
-                string[] extractedFilePaths = Directory.GetFiles(extractionDirectory);
-
-                foreach (string filePath in extractedFilePaths)
+                using (ZipArchive archive = ZipFile.OpenRead(zipFilePath))
                 {
-                    // Verificar si el archivo es otro ZIP antes de intentar extraerlo
-                    if (Path.GetExtension(filePath).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+                    foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        // Verificar si el archivo ZIP secundario existe antes de intentar extraerlo
-                        if (File.Exists(filePath))
+                        string entryPath = Path.Combine(extractionDirectory, entry.FullName);
+
+                        // Si la entrada es un directorio, asegurarse de que exista
+                        if (entry.FullName.EndsWith("/"))
                         {
-                            // Recursivamente extraer el contenido del archivo ZIP secundario
-                            fileContentZip.AddRange(ExtractZipContents(filePath));
+                            Directory.CreateDirectory(entryPath);
                         }
                         else
                         {
-                            Console.WriteLine($"El archivo ZIP secundario no existe: {filePath}");
+                            // Extraer la entrada del archivo ZIP
+                            entry.ExtractToFile(entryPath, true);
+
+                            fileInfo fileInfo = new fileInfo
+                            {
+                                nameFile = entry.Name,
+                                lastModification = File.GetLastWriteTime(entryPath),
+                                filePath = entryPath
+                            };
+                            fileContentZip.Add(fileInfo);
                         }
-                    }
-                    else
-                    {
-                        fileInfo fileInfo = new fileInfo
-                        {
-                            nameFile = Path.GetFileName(filePath),
-                            lastModification = File.GetLastWriteTime(filePath),
-                            filePath = filePath
-                        };
-                        fileContentZip.Add(fileInfo);
                     }
                 }
 
