@@ -11,7 +11,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
         FileHelper */
         private List<FileHelper> fileHelp;
         /*Ruta de donde provienen los archivos*/
-        string folderPath = @"C:\Users\Lopezadri\Desktop\Expedientes\";
+        //string folderPath = @"C:\Users\Lopezadri\Desktop\Expedientes\";
+        string folderPath2 = @"C:\Users\Usuario\Desktop\Expedientes\ ";
         private string zipsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "ZIPS");
         int bandera;
 
@@ -61,7 +62,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
         private void Form1_Load(object sender, EventArgs e)
         {
             /* La lista le asignas el resultado del metodo de la clase */
-            fileHelp = FileHelper.LoadPath(folderPath);
+            //fileHelp = FileHelper.LoadPath(folderPath);
+            fileHelp = FileHelper.LoadPath(folderPath2);
             bandera = 1;
             loadExtractedList();
            
@@ -134,7 +136,9 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         Directory.CreateDirectory(zipsFolder);
 
                         // Extraer el contenido del archivo ZIP en la carpeta creada dentro de "ZIPS"
-                        ZipFile.ExtractToDirectory((folderPath + @"\" + cellValue), zipsFolder);
+                        //ZipFile.ExtractToDirectory((folderPath + @"\" + cellValue), zipsFolder);
+
+                        ZipFile.ExtractToDirectory((folderPath2 + @"\" + cellValue), zipsFolder);
 
                         // Mostrar un mensaje informativo
                         MessageBox.Show($"Contenido del archivo {cellValue} extraído en la carpeta 'ZIPS/{folderName}' en el directorio actual.");
