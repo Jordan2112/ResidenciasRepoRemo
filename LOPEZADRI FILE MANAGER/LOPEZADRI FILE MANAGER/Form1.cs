@@ -74,7 +74,7 @@ namespace LOPEZADRI_FILE_MANAGER
 
             int rowIndex = e.RowIndex;
 
-            MessageBox.Show(rowIndex.ToString());
+            //MessageBox.Show(rowIndex.ToString());
 
             if (rowIndex >= 0 && rowIndex < fileList.Count)
             {
