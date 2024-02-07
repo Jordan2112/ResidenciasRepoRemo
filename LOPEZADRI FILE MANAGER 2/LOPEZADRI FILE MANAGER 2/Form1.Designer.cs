@@ -92,6 +92,7 @@
             // dgvContenido
             // 
             dgvContenido.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvContenido.BackgroundColor = SystemColors.Control;
             dgvContenido.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvContenido.Location = new Point(6, 24);
             dgvContenido.Name = "dgvContenido";
@@ -105,25 +106,26 @@
             gbxZipContenido.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             gbxZipContenido.Location = new Point(507, 169);
             gbxZipContenido.Name = "gbxZipContenido";
-            gbxZipContenido.Size = new Size(248, 260);
+            gbxZipContenido.Size = new Size(352, 260);
             gbxZipContenido.TabIndex = 3;
             gbxZipContenido.TabStop = false;
             gbxZipContenido.Text = "ZIPCONTENIDO";
             // 
             // dgvContenidoZip
             // 
+            dgvContenidoZip.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvContenidoZip.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvContenidoZip.Location = new Point(6, 24);
             dgvContenidoZip.Name = "dgvContenidoZip";
             dgvContenidoZip.RowTemplate.Height = 25;
-            dgvContenidoZip.Size = new Size(236, 230);
+            dgvContenidoZip.Size = new Size(340, 230);
             dgvContenidoZip.TabIndex = 0;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(767, 439);
+            ClientSize = new Size(872, 439);
             Controls.Add(gbxZipContenido);
             Controls.Add(gbxContenido);
             Controls.Add(gbxExpedientes);
