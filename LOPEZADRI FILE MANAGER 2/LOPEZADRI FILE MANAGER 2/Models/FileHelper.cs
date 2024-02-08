@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.IO.Compression;
 
 namespace LOPEZADRI_FILE_MANAGER_2.Models
 {
@@ -17,36 +18,56 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             /* Lista para almacenar los archivos y carpetas y agregarlos a una lista la cual será retornada */
             List<FileHelper> fileList = new List<FileHelper>();
 
-            // Obtiene la lista de rutas de archivos y carpetas en el directorio especificado
-            string[] entries = Directory.GetFileSystemEntries(folderPath);
-
-            // Itera sobre cada ruta de archivo o carpeta en el directorio
-            foreach (string entryPath in entries)
+            // Verificar si la ruta es un archivo ZIP
+            if (Path.GetExtension(folderPath).Equals(".zip", StringComparison.OrdinalIgnoreCase))
             {
-                // Crea un objeto FileSystemInfo para obtener información sobre el archivo o carpeta
-                FileSystemInfo fileInfo = new FileInfo(entryPath);
-
-                // Crea un nuevo objeto FileHelper y lo agrega a la lista
-                fileList.Add(new FileHelper
+                // Lógica para cargar el contenido de un archivo ZIP
+                using (ZipArchive archive = ZipFile.OpenRead(folderPath))
                 {
-                    // Asigna el nombre del archivo o carpeta al campo 'nameFile'
-                    nameFile = fileInfo.Name,
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        // Crea un nuevo objeto FileHelper y lo agrega a la lista
+                        fileList.Add(new FileHelper
+                        {
+                            nameFile = entry.Name,
+                            lastModification = entry.LastWriteTime.DateTime,
+                            filePath = entry.FullName
+                        });
+                    }
+                }
+            }
+            else
+            {
+                // La ruta no es un archivo ZIP, obtener la lista de rutas de archivos y carpetas en el directorio especificado
+                string[] entries = Directory.GetFileSystemEntries(folderPath);
 
-                    // Asigna la fecha de última modificación al campo 'lastModification'
-                    lastModification = fileInfo.LastWriteTime.Date,
+                // Iterar sobre cada ruta de archivo o carpeta en el directorio
+                foreach (string entryPath in entries)
+                {
+                    // Crear un objeto FileSystemInfo para obtener información sobre el archivo o carpeta
+                    FileSystemInfo fileInfo = new FileInfo(entryPath);
 
-                    // Asigna la fecha de creación al campo 'creationFile'
-                    creationFile = fileInfo.CreationTime.Date,
+                    // Crear un nuevo objeto FileHelper y agregarlo a la lista
+                    fileList.Add(new FileHelper
+                    {
+                        // Asignar el nombre del archivo o carpeta al campo 'nameFile'
+                        nameFile = fileInfo.Name,
 
-                    // Asigna la ruta completa del archivo o carpeta al campo 'filePath'
-                    filePath = fileInfo.FullName
-                });
+                        // Asignar la fecha de última modificación al campo 'lastModification'
+                        lastModification = fileInfo.LastWriteTime.Date,
+
+                        // Asignar la fecha de creación al campo 'creationFile'
+                        creationFile = fileInfo.CreationTime.Date,
+
+                        // Asignar la ruta completa del archivo o carpeta al campo 'filePath'
+                        filePath = fileInfo.FullName
+                    });
+                }
             }
 
-            // Retorna la lista de objetos FileHelper que representan los archivos y carpetas en el directorio
+            // Retornar la lista de objetos FileHelper que representan los archivos y carpetas en el directorio
             return fileList;
         }
-
 
         /*Convierte la lista ya con contenido a una data table*/
         public static DataTable ConvertListToDataTable(List<FileHelper> fileList)
@@ -75,8 +96,6 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             // Retorna el DataTable que contiene los datos convertidos de la lista
             return dataTable;
         }
-
-       
 
 
 

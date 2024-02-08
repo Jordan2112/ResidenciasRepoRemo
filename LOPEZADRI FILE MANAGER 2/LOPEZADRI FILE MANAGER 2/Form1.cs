@@ -9,7 +9,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         /* Lista que se usa para almacenar los resultados que contenga del metodo de la clase 
         FileHelper */
-        private List<FileHelper> fileHelp;
+        private List<FileHelper> fileHelp, fileHelp2;
         /*Ruta de donde provienen los archivos*/
         string folderpath = @"c:\users\lopezadri\desktop\expedientes\";
         //string folderPath2 = @"C:\Users\Usuario\Desktop\Expedientes\ ";
@@ -110,11 +110,30 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
 
         }
+        public void loadExtractedListZip()
+        {
+            // Convierte la lista de objetos FileHelper a un DataTable
+            DataTable dataTable = FileHelper.ConvertListToDataTable(fileHelp2);
+
+            // Establece el DataTable como fuente de datos para el DataGridView
+            dgvContenidoZip.DataSource = dataTable;
+
+            // Oculta y configura las columnas específicas del DataGridView
+            dgvContenidoZip.Columns[1].Visible = false;
+            dgvContenidoZip.Columns[1].HeaderText = string.Empty;
+            dgvContenidoZip.Columns[2].Visible = false;
+            dgvContenidoZip.Columns[2].HeaderText = string.Empty;
+            dgvContenidoZip.Columns[3].Visible = false;
+            dgvContenidoZip.Columns[3].HeaderText = string.Empty;
+
+        }
 
         private void dgvExpedientes_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             // Lista nueva para almacenar lo que está dentro del ZIP
             fileHelp = new List<FileHelper>();
+            fileHelp2 = new List<FileHelper>();
+
             // Bandera para decisión en extraer el contenido a un DataTable
             bandera = 2;
 
@@ -134,7 +153,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                         // Crear una carpeta con el nombre del archivo (sin la extensión .zip) dentro de "ZIPS"
                         string folderName = Path.GetFileNameWithoutExtension(cellValue);
-
                         string zipsFolder = Path.Combine(zipsDirectoryPath, folderName);
 
                         // Verificar si la carpeta ya existe antes de intentar extraer los archivos nuevamente
@@ -142,80 +160,86 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         {
                             Directory.CreateDirectory(zipsFolder);
 
-                            // Extraer solo archivos con extensión ".zip"
+                            // Extraer solo el primer archivo con extensión ".zip"
                             using (ZipArchive archive = ZipFile.OpenRead(Path.Combine(folderpath, cellValue)))
                             {
-                                foreach (ZipArchiveEntry entry in archive.Entries)
+                                ZipArchiveEntry firstZipEntry = archive.Entries.FirstOrDefault(entry => entry.FullName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
+
+                                if (firstZipEntry != null)
                                 {
-                                    if (entry.FullName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        entry.ExtractToFile(Path.Combine(zipsFolder, entry.FullName), true);
+                                    // Extraer solo el primer archivo ZIP
+                                    ExtractZipEntry(firstZipEntry, zipsFolder);
 
-                                        string nestedZipPath = Path.Combine(zipsFolder, entry.FullName);
+                                    // Ruta del zip que está en el programa
+                                    string nestedZipPath = Path.Combine(zipsFolder, firstZipEntry.FullName);
+                                    // Ruta del zip principal
+                                    string path = folderpath + cellValue;
 
-                                        // Actualizar el segundo DataGridView con el nombre del ZIP anidado
-                                        dgvContenido.DataSource = GetNestedZipNameTable(entry.FullName);
+                                    fileHelp = FileHelper.LoadPath(path);
 
-                                        // Actualizar el tercer DataGridView con el contenido del ZIP anidado
-                                        dgvContenidoZip.DataSource = GetNestedZipContentTable(nestedZipPath, zipsFolder);
+                                    loadExtractedList();
+                                    SearchAndHighlightZipFiles();
 
-                                        // Refrescar las vistas de los DataGridViews
-                                        dgvContenido.Refresh();
-                                        dgvContenidoZip.Refresh();
-                                    }
+                                    fileHelp2 = FileHelper.LoadPath(nestedZipPath);
+                                    loadExtractedListZip();
+
+                                }
+                                else
+                                {
+                                    MessageBox.Show("No se encontró ningún archivo ZIP dentro del archivo seleccionado.", "NOTIFICACION",MessageBoxButtons.OK,MessageBoxIcon.Error);
                                 }
                             }
                         }
                         else
                         {
-                            // La carpeta ya existe, cargar los archivos en el DataGridView nuevamente
-                            fileHelp = FileHelper.LoadPath(zipsFolder)
-                                .Where(file => Path.GetExtension(file.nameFile) == ".zip")
-                                .ToList();
+                            // La carpeta ya existe, mostrar los archivos nuevamente
+                            fileHelp = FileHelper.LoadPath(folderpath + cellValue);
+                            loadExtractedList();
+                            SearchAndHighlightZipFiles();
 
-                            // Actualizar el segundo DataGridView con el nombre del ZIP anidado
-                            dgvContenido.DataSource = GetNestedZipNameTable(fileHelp.FirstOrDefault()?.nameFile);
+                            // Obtener la lista de archivos ZIP en la carpeta
+                            string[] zipFiles = Directory.GetFiles(zipsFolder, "*.zip");
 
-                            // Actualizar el tercer DataGridView con el contenido del ZIP anidado
-                            dgvContenidoZip.DataSource = GetNestedZipContentTable(Path.Combine(zipsFolder, fileHelp.FirstOrDefault()?.nameFile), zipsFolder);
+                            if (zipFiles.Length == 1)
+                            {
+                                // Obtener el contenido del único archivo ZIP en la carpeta
+                                using (ZipArchive archive = ZipFile.OpenRead(zipFiles[0]))
+                                {
+                                    // Obtener la lista de archivos del ZIP
+                                    fileHelp2 = new List<FileHelper>();
+                                    foreach (ZipArchiveEntry entry in archive.Entries)
+                                    {
+                                        fileHelp2.Add(new FileHelper
+                                        {
+                                            nameFile = entry.Name,
+                                            lastModification = entry.LastWriteTime.DateTime,
+                                            filePath = entry.FullName
+                                        });
+                                    }
 
-                            // Refrescar las vistas de los DataGridViews
-                            dgvContenido.Refresh();
-                            dgvContenidoZip.Refresh();
+                                    // Mostrar la lista de archivos del ZIP
+                                    loadExtractedListZip();
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show("No se encontró ningún archivo ZIP", "NOTIFICACION", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
-                        // Manejar posibles excepciones al extraer el archivo ZIP
-                        MessageBox.Show($"Error al extraer el archivo ZIP: {ex.Message}");
+                        // Manejar posibles excepciones al trabajar con el archivo ZIP
+                        MessageBox.Show($"Error al leer o extraer el archivo ZIP: {ex.Message}","NOTIFICACION",MessageBoxButtons.OK,MessageBoxIcon.Question);
                     }
                 }
             }
         }
 
-        private DataTable GetNestedZipNameTable(string nestedZipName)
+        private void ExtractZipEntry(ZipArchiveEntry entry, string extractPath)
         {
-            DataTable dataTable = new DataTable();
-            dataTable.Columns.Add("NombreZIPAnidado", typeof(string));
-            dataTable.Rows.Add(nestedZipName);
-            return dataTable;
-        }
-
-        private DataTable GetNestedZipContentTable(string nestedZipPath, string extractionPath)
-        {
-            DataTable dataTable = new DataTable();
-            dataTable.Columns.Add("NombreArchivo", typeof(string));
-
-            using (ZipArchive nestedArchive = ZipFile.OpenRead(nestedZipPath))
-            {
-                foreach (ZipArchiveEntry nestedEntry in nestedArchive.Entries)
-                {
-                    nestedEntry.ExtractToFile(Path.Combine(extractionPath, nestedEntry.FullName), true);
-                    dataTable.Rows.Add(nestedEntry.FullName);
-                }
-            }
-
-            return dataTable;
+            // Extraer un archivo ZIP
+            entry.ExtractToFile(Path.Combine(extractPath, entry.FullName), true);
         }
 
 

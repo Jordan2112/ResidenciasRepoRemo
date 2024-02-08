@@ -92,7 +92,6 @@
             // dgvContenido
             // 
             dgvContenido.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvContenido.BackgroundColor = SystemColors.Control;
             dgvContenido.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvContenido.Location = new Point(6, 24);
             dgvContenido.Name = "dgvContenido";
