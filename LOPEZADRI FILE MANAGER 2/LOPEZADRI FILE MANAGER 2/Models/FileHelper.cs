@@ -6,10 +6,15 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
     internal class FileHelper
     {
         //Atributos que contiene un archivo y sus propiedades
-        public string? nameFile { get; set; }
+        public string nameFile { get; set; }
         public DateTime lastModification { get; set; }
         public DateTime creationFile { get; set; }
         public string? filePath { get; set; }
+
+        public FileHelper()
+        {
+            nameFile = "";
+        }
 
         /*Metodo el cual carga los archivos de un directorio en especifico con base a una ruta 
         proporcionado en la clase de la forma*/
@@ -64,7 +69,6 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
                     });
                 }
             }
-
             // Retornar la lista de objetos FileHelper que representan los archivos y carpetas en el directorio
             return fileList;
         }
@@ -96,6 +100,15 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             // Retorna el DataTable que contiene los datos convertidos de la lista
             return dataTable;
         }
+
+        public static bool ZipContainsFile(string zipPath, string fileName)
+        {
+            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
+            {
+                return archive.Entries.Any(entry => entry.FullName.Equals(fileName, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
 
 
     }

@@ -1,5 +1,6 @@
 using LOPEZADRI_FILE_MANAGER_2.Models;
 using System.Data;
+using System.Diagnostics;
 using System.IO.Compression;
 
 
@@ -10,12 +11,15 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         /* Lista que se usa para almacenar los resultados que contenga del metodo de la clase 
         FileHelper */
-        private List<FileHelper> fileHelp, fileHelp2;
+        private List<FileHelper> fileHelp;
+
+        private List<FileHelper>? fileHelp2;
+
         private ZipHelper zipHelper;
-       
+
         /*Ruta de donde provienen los archivos*/
         string folderpath = @"c:\users\lopezadri\desktop\expedientes\";
-        //string folderPath2 = @"C:\Users\Usuario\Desktop\Expedientes\ ";
+
         private string zipsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "ZIPS");
         int bandera;
 
@@ -23,60 +27,35 @@ namespace LOPEZADRI_FILE_MANAGER_2
         {
             /* Crea una lista cada que se inicia el programa */
             InitializeComponent();
+
+            dgvContenido.CellClick += dgvContenido_CellClick;
+
             fileHelp = new List<FileHelper>();
 
             zipHelper = new ZipHelper(zipsDirectoryPath);
 
             zipHelper.CreateZipsDirectory();
-            //CreateZipsDirectory();
+
+
 
         }
-        //Método para crear el directorio "ZIPS" si no existe
-        //private void CreateZipsDirectory()
-        //{
-        //    try
-        //    {
-        //        Verificar si el directorio "ZIPS" no existe y crearlo si es necesario
-        //        if (!Directory.Exists(zipsDirectoryPath))
-        //        {
-        //            Directory.CreateDirectory(zipsDirectoryPath);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Manejar posibles excepciones al crear el directorio
-        //        MessageBox.Show($"Error al crear el directorio 'ZIPS': {ex.Message}");
-        //    }
-        //}
-        // Método para buscar y resaltar archivos ZIP en el DataGridView
-        //private void SearchAndHighlightZipFiles()
-        //{
-        //    foreach (DataGridViewRow row in dgvContenido.Rows)
-        //    {
-        //        foreach (DataGridViewCell cell in row.Cells)
-        //        {
-        //            // Obtener el valor de la celda
-        //            object cellValue = cell.Value;
-
-        //            // Verificar si el valor de la celda termina con ".zip" (ignorando mayúsculas y minúsculas)
-        //            if (cellValue?.ToString()?.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) == true)
-        //            {
-        //                // Resaltar la celda con un color amarillo
-        //                cell.Style.BackColor = Color.Yellow;
-        //            }
-        //        }
-        //    }
-        //}
         private void Form1_Load(object sender, EventArgs e)
         {
+
             /* La lista le asignas el resultado del metodo de la clase */
             fileHelp = FileHelper.LoadPath(folderpath);
             //fileHelp = FileHelper.LoadPath(folderPath2);
             bandera = 1;
+
             loadExtractedList();
+            txtFiltro.Focus();
+
+            txtFiltro.TextChanged += txtFiltro_TextChanged;
+
         }
         public void loadExtractedList()
         {
+
             if (bandera == 1)
             {
                 // Convierte la lista de objetos FileHelper a un DataTable
@@ -135,39 +114,14 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
             }
         }
-        //public void loadExtractedListZip()
-        //{
-        //    // Convierte la lista de objetos FileHelper a un DataTable
-        //    DataTable dataTable = FileHelper.ConvertListToDataTable(fileHelp2);
 
-        //    // Establece el DataTable como fuente de datos para el DataGridView
-        //    dgvContenidoZip.DataSource = dataTable;
-
-        //    if (dgvContenidoZip.RowCount > 0 && dgvContenidoZip.ColumnCount > 0)
-        //    {
-        //        dgvContenidoZip.CurrentCell = this.dgvExpedientes[0, 0];
-        //        this.dgvContenidoZip.CurrentCell.Selected = false;
-        //    }
-
-        //    // Oculta y configura las columnas específicas del DataGridView
-        //    dgvContenidoZip.Columns[1].Visible = false;
-        //    dgvContenidoZip.Columns[1].HeaderText = string.Empty;
-        //    dgvContenidoZip.Columns[2].Visible = false;
-        //    dgvContenidoZip.Columns[2].HeaderText = string.Empty;
-        //    dgvContenidoZip.Columns[3].Visible = false;
-        //    dgvContenidoZip.Columns[3].HeaderText = string.Empty;
-
-        //    foreach (DataGridViewColumn column in dgvContenidoZip.Columns)
-        //    {
-        //        column.SortMode = DataGridViewColumnSortMode.NotSortable;
-        //    }
-
-        //}
 
         private string? lastClickedCellValue = null;
-
+        string? nestedZipPath;
+        string? folderName, cellValue;
         private void dgvExpedientes_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+
             // Lista nueva para almacenar lo que está dentro del ZIP
             fileHelp = new List<FileHelper>();
             fileHelp2 = new List<FileHelper>();
@@ -179,7 +133,10 @@ namespace LOPEZADRI_FILE_MANAGER_2
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
                 // Obtener el contenido de la celda seleccionada
-                string cellValue = (string)dgvExpedientes.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                cellValue = (string)dgvExpedientes.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+
+                label2.Text = cellValue;
+
 
                 // Realizar la acción deseada solo si el contenido de la celda no es nulo
                 if (cellValue != null)
@@ -191,7 +148,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         zipHelper.CreateZipsDirectory();
 
                         // Crear una carpeta con el nombre del archivo (sin la extensión .zip) dentro de "ZIPS"
-                        string folderName = Path.GetFileNameWithoutExtension(cellValue);
+                        folderName = Path.GetFileNameWithoutExtension(cellValue);
                         string zipsFolder = Path.Combine(zipsDirectoryPath, folderName);
 
                         // Verificar si es la misma celda que la última clicada
@@ -206,17 +163,16 @@ namespace LOPEZADRI_FILE_MANAGER_2
                             // Extraer solo el primer archivo con extensión ".zip"
                             using (ZipArchive archive = ZipFile.OpenRead(Path.Combine(folderpath, cellValue)))
                             {
-                                ZipArchiveEntry firstZipEntry = archive.Entries.FirstOrDefault(entry => entry.FullName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
+                                ZipArchiveEntry? firstZipEntry = archive.Entries.FirstOrDefault(entry => entry.FullName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
 
                                 if (firstZipEntry != null)
                                 {
                                     // Extraer solo el primer archivo ZIP
-                                    zipHelper.ExtractZipEntry(firstZipEntry,zipsFolder);
+                                    zipHelper.ExtractZipEntry(firstZipEntry, zipsFolder);
                                     //ExtractZipEntry(firstZipEntry, zipsFolder);
 
-
                                     // Ruta del zip que está en el programa
-                                    string nestedZipPath = Path.Combine(zipsFolder, firstZipEntry.FullName);
+                                    nestedZipPath = Path.Combine(zipsFolder, firstZipEntry.FullName);
                                     // Ruta del zip principal
                                     string path = folderpath + cellValue;
 
@@ -238,7 +194,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 }
                                 else
                                 {
-                                    MessageBox.Show("No se encontró ningún archivo ZIP dentro del archivo seleccionado.", "NOTIFICACION", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("No se encontró ningún archivo ZIP dentro del archivo seleccionado.", "N O T I F I C A C I O N", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 }
                             }
                         }
@@ -273,7 +229,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                             }
                             else
                             {
-                                MessageBox.Show("No se encontró ningún archivo ZIP", "NOTIFICACION", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show("No se encontró ningún archivo ZIP", "N O T I F I C A C I O N", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
 
@@ -282,41 +238,305 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     catch (Exception ex)
                     {
                         // Manejar posibles excepciones al trabajar con el archivo ZIP
-                        MessageBox.Show($"Error al leer o extraer el archivo ZIP: {ex.Message}", "NOTIFICACION", MessageBoxButtons.OK, MessageBoxIcon.Question);
+                        MessageBox.Show($"Error al leer o extraer el archivo ZIP: {ex.Message}", "N O T I F I C A C I O N", MessageBoxButtons.OK, MessageBoxIcon.Question);
                     }
                 }
             }
         }
-        // Función para eliminar carpetas en la carpeta "ZIPS"
-        //private void CleanupZipsDirectory()
-        //{
-        //    string[] existingZips = Directory.GetDirectories(zipsDirectoryPath);
-        //    foreach (var zipFolder in existingZips)
-        //    {
-        //        try
-        //        {
-        //            // Eliminar directamente sin enviar a la papelera de reciclaje
-        //            Directory.Delete(zipFolder, true);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            // Manejar cualquier error al eliminar
-        //            MessageBox.Show($"Error al eliminar la carpeta {zipFolder}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //        }
-        //    }
-        //}
+
+        private void txtFiltro_TextChanged(object? sender, EventArgs e)
+        {
+            fileHelp = FileHelper.LoadPath(folderpath);
+
+            // Eliminar espacios en blanco alrededor del texto del filtro
+            string filtroSinEspacios = txtFiltro.Text.Trim();
+
+            // Filtrar la lista utilizando LINQ
+            List<FileHelper> filteredList = fileHelp
+                .Where(fh => fh.nameFile.Replace(" ", "").Contains(filtroSinEspacios.Replace(" ", "")))
+                .ToList();
+
+            DataTable dataTable = FileHelper.ConvertListToDataTable(filteredList);
+
+            // Asignar el DataTable al DataGridView
+            dgvExpedientes.DataSource = dataTable;
+
+            dgvContenido.DataSource = null;
+            dgvContenidoZip.DataSource = null;
+        }
 
 
-        //private void ExtractZipEntry(ZipArchiveEntry entry, string extractPath)
-        //{
-        //    // Extraer un archivo ZIP
-        //    entry.ExtractToFile(Path.Combine(extractPath, entry.FullName), true);
-        //}
+        private void btnAgregar_Click(object sender, EventArgs e)
+        {
+            if (rbtzipPrincipal.Checked)
+            {
+                if (lastClickedCellValue != null)
+                {
+                    // Abrir cuadro de diálogo en la carpeta de documentos
+                    OpenFileDialog openFileDialog = new OpenFileDialog();
+                    openFileDialog.Multiselect = true;
+                    openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // Obtener la lista de archivos seleccionados
+                        string[] selectedFiles = openFileDialog.FileNames;
+
+                        // Agregar archivos al ZIP principal
+                        AddFilesToMainZip(selectedFiles);
+
+                    }
+                }
+                else
+                {
+                    // Mostrar MessageBox de advertencia
+                    MessageBox.Show("Haga doble clic en un ZIP principal antes de agregar archivos.", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+            }
+            else if (rbtzipContenido.Checked)
+            {
+                if (lastClickedCellValue != null)
+                {
+
+                    // Abrir cuadro de diálogo en la carpeta de documentos
+                    OpenFileDialog openFileDialog = new OpenFileDialog();
+                    openFileDialog.Multiselect = true;
+                    openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // Obtener la lista de archivos seleccionados
+                        string[] selectedFiles = openFileDialog.FileNames;
+                        //ReplaceInnerZipInOuterZip();
+                        // Agregar archivos al ZIP principal
+                        AddFilesToExtractedZip(selectedFiles);
+                    }
+                }
+                else
+                {
+                    // Mostrar MessageBox de advertencia
+                    MessageBox.Show("Haga doble clic en un ZIP principal antes de agregar archivos.", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+            }
+            else
+            {
+                // Ningún radio button seleccionado, mostrar MessageBox de advertencia
+                MessageBox.Show("Seleccione una opción antes de agregar archivos.", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void AddFilesToMainZip(string[] files)
+        {
+            // Validar si hay un ZIP principal seleccionado
+            if (lastClickedCellValue != null)
+            {
+                // Ruta del ZIP principal en la carpeta principal
+                string mainZipPath = Path.Combine(folderpath, lastClickedCellValue);
+              
+                // Ruta del ZIP temporal
+                string tempZipPath = Path.Combine(Path.GetTempPath(), "temp_zip_" + Guid.NewGuid().ToString() + ".zip");
+
+                try
+                {
+                    // Copiar el ZIP principal al temporal
+                    File.Copy(mainZipPath, tempZipPath, true);
+
+                    // Extraer archivos actuales del ZIP principal
+                    List<FileHelper> currentFiles = FileHelper.LoadPath(tempZipPath);
+
+                    // Abrir el archivo ZIP temporal
+                    using (ZipArchive archive = ZipFile.Open(tempZipPath, ZipArchiveMode.Update))
+                    {
+                        // Agregar archivos seleccionados al ZIP temporal
+                        foreach (string filePath in files)
+                        {
+                            string fileName = Path.GetFileName(filePath);
+
+                            // Verificar si el archivo ya existe en el ZIP
+                            if (!currentFiles.Any(file => file.nameFile.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                // Crear una nueva entrada en el ZIP y extraer el archivo
+                                ZipArchiveEntry entry = archive.CreateEntry(fileName);
+                                using (Stream entryStream = entry.Open())
+                                using (FileStream fileStream = File.OpenRead(filePath))
+                                {
+                                    fileStream.CopyTo(entryStream);
+                                }
+                            }
+                        }
+
+                    }
+
+                    // Sustituir el ZIP principal con el ZIP temporal
+                    File.Copy(tempZipPath, mainZipPath, true);
+
+                    MessageBox.Show("Archivo agregado correctamente.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    fileHelp = FileHelper.LoadPath(mainZipPath);
+
+                    loadExtractedList();
+
+                    zipHelper.SearchAndHighlightZipFiles(dgvContenido);
+
+                    fileHelp2 = FileHelper.LoadPath(nestedZipPath);
+
+                    zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
+
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("error");
+                }
+                finally
+                {
+                    // Eliminar el archivo ZIP temporal
+                    File.Delete(tempZipPath);
+                }
+
+            }
+        }
+
+        private void AddFilesToExtractedZip(string[] files)
+        {
+            // Validar si hay un ZIP principal seleccionado dentro de la ruta del programa
+            if (lastClickedCellValue != null)
+            {
+                // Ruta del ZIP interno en la carpeta principal
+                string nestedZipPath = Path.Combine(zipsDirectoryPath, folderName, lastClickedCellValue);
+                Debug.WriteLine(nestedZipPath);
+
+                // Ruta del ZIP temporal
+                string tempZipPath = Path.Combine(Path.GetTempPath(), "temp_nested_zip_" + Guid.NewGuid().ToString() + ".zip");
+
+                try
+                {
+                    // Copiar el ZIP interno al temporal
+                    File.Copy(nestedZipPath, tempZipPath, true);
+
+                    // Extraer archivos actuales del ZIP interno
+                    List<FileHelper> currentNestedFiles = FileHelper.LoadPath(tempZipPath);
+
+                    // Abrir el archivo ZIP temporal interno
+                    using (ZipArchive nestedArchive = ZipFile.Open(tempZipPath, ZipArchiveMode.Update))
+                    {
+                        // Agregar archivos seleccionados al ZIP temporal interno
+                        foreach (string filePath in files)
+                        {
+                            string fileName = Path.GetFileName(filePath);
+
+                            // Verificar si el archivo ya existe en el ZIP interno
+                            if (!currentNestedFiles.Any(file => file.nameFile.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                // Crear una nueva entrada en el ZIP interno y extraer el archivo
+                                ZipArchiveEntry nestedEntry = nestedArchive.CreateEntry(fileName);
+                                using (Stream entryStream = nestedEntry.Open())
+                                using (FileStream fileStream = File.OpenRead(filePath))
+                                {
+                                    fileStream.CopyTo(entryStream);
+                                }
+                            }
+                        }
+                    }
+
+                    // Sustituir el ZIP interno con el ZIP temporal
+                    File.Copy(tempZipPath, nestedZipPath, true);
+                    ReplaceInnerZipInOuterZip();
+
+                    MessageBox.Show("Archivo agregado correctamente al ZIP interno.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Vuelve a cargar la lista de archivos extraídos
+                    fileHelp2 = FileHelper.LoadPath(nestedZipPath);
+                    zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
+
+
+                }
+                catch(Exception)
+                {
+                    MessageBox.Show("Selecciona el segundo archivo ZIP.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    // Eliminar el archivo ZIP temporal interno
+                    File.Delete(tempZipPath);
+                   
+                }
+
+            }
+        }
+
+        private void ReplaceInnerZipInOuterZip()
+        {
+            // Ruta del ZIP externo
+            string outerZipPath = Path.Combine(folderpath, cellValue);
+            Debug.WriteLine(outerZipPath);
+            // Ruta temporal para la carpeta del ZIP externo
+            string outerFolderTempPath = Path.Combine(Path.GetTempPath(), "temp_outer_folder_" + Guid.NewGuid().ToString());
+
+            try
+            {
+                // Extraer el archivo ZIP externo a la carpeta temporal
+                ZipFile.ExtractToDirectory(outerZipPath, outerFolderTempPath);
+
+                // Ruta del ZIP interno en la carpeta temporal
+                string innerZipTempPath = Path.Combine(outerFolderTempPath, lastClickedCellValue);
+
+                // Ruta del nuevo ZIP que quieres agregar al ZIP interno
+                string newInnerZipPath = zipsDirectoryPath + @"\" + folderName + @"\" + lastClickedCellValue;
+                
+                // Eliminar el archivo ZIP original
+                File.Delete(outerZipPath);
+
+                // Sustituir el ZIP interno con el nuevo ZIP
+                File.Copy(newInnerZipPath, innerZipTempPath, true);
+
+                // Sobrescribir el archivo ZIP original con la carpeta temporal actualizada
+                ZipFile.CreateFromDirectory(outerFolderTempPath, outerZipPath, CompressionLevel.Optimal, false);
+            }
+            finally
+            {
+                // Eliminar la carpeta temporal externa
+                Directory.Delete(outerFolderTempPath, true);
+            }
+        }
+
+        private void dgvContenido_CellClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            // Verificar si la celda clicada es válida
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                // Obtener el valor de la celda clicada
+                lastClickedCellValue = dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+
+                // Deseleccionar la celda actual en otras filas
+                foreach (DataGridViewRow row in dgvExpedientes.Rows)
+                {
+                    if (row.Index != e.RowIndex) // Evitar deseleccionar la celda clicada
+                    {
+                        row.Selected = false;
+                    }
+                }
+
+            }
+        }
+
+        private void dgvContenido_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Verificar si la celda seleccionada es válida
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                // Obtener el contenido de la celda seleccionada
+                string cellValue = (string)dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+
+                label2.Text = cellValue;
+            }
+        }
+
 
     }
 
-
-
-
 }
+
+
 
