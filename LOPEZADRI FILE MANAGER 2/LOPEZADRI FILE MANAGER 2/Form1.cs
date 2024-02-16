@@ -268,8 +268,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         private void btnAgregar_Click(object sender, EventArgs e)
         {
+            
+
             if (rbtzipPrincipal.Checked)
             {
+                MessageBox.Show("Recuerda a cual zip quieres agregar.", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Question);
                 if (lastClickedCellValue != null)
                 {
                     // Abrir cuadro de diálogo en la carpeta de documentos
@@ -284,6 +287,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                         // Agregar archivos al ZIP principal
                         AddFilesToMainZip(selectedFiles);
+                        ResaltarUltimaCeldaAgregada(dgvContenido);
 
                     }
                 }
@@ -296,6 +300,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
             else if (rbtzipContenido.Checked)
             {
+                MessageBox.Show("Recuerda a cual zip quieres agregar.", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Question);
                 if (lastClickedCellValue != null)
                 {
 
@@ -311,6 +316,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         //ReplaceInnerZipInOuterZip();
                         // Agregar archivos al ZIP principal
                         AddFilesToExtractedZip(selectedFiles);
+                        ResaltarUltimaCeldaAgregada(dgvContenidoZip);
                     }
                 }
                 else
@@ -527,11 +533,35 @@ namespace LOPEZADRI_FILE_MANAGER_2
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
                 // Obtener el contenido de la celda seleccionada
-                string cellValue = (string)dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                string? cellValue = dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
 
-                label2.Text = cellValue;
+                // Validar si el contenido de la celda es un archivo ZIP
+                if (!string.IsNullOrEmpty(cellValue) && cellValue.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                {
+                    label2.Text = cellValue;
+                }
+                else
+                {
+                    MessageBox.Show("Selecciona el archivo ZIP.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
+
+        private void ResaltarUltimaCeldaAgregada(DataGridView dataGridView)
+        {
+            // Obtener el índice de la última fila en el DataGridView
+            int ultimaFilaIndex = dataGridView.Rows.Count - 1;
+
+            // Obtener la última celda en la última fila
+            DataGridViewCell ultimaCelda = dataGridView.Rows[ultimaFilaIndex].Cells[0];
+
+            // Establecer la celda actual para resaltarla
+            dataGridView.CurrentCell = ultimaCelda;
+
+            // Hacer que la celda sea visible en el área visible del DataGridView
+            dataGridView.FirstDisplayedScrollingRowIndex = ultimaFilaIndex;
+        }
+
 
 
     }

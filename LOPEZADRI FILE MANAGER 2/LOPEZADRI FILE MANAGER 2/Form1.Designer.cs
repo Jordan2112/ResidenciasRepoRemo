@@ -219,19 +219,22 @@
             // groupBox2
             // 
             groupBox2.Controls.Add(label2);
+            groupBox2.FlatStyle = FlatStyle.Popup;
             groupBox2.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            groupBox2.Location = new Point(177, 12);
+            groupBox2.Location = new Point(177, 3);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(293, 40);
+            groupBox2.Size = new Size(200, 72);
             groupBox2.TabIndex = 4;
             groupBox2.TabStop = false;
+            groupBox2.Text = "Archivo elegido";
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(24, 17);
+            label2.BorderStyle = BorderStyle.Fixed3D;
+            label2.Location = new Point(31, 32);
             label2.Name = "label2";
-            label2.Size = new Size(0, 17);
+            label2.Size = new Size(2, 19);
             label2.TabIndex = 0;
             // 
             // Form1
