@@ -101,6 +101,7 @@
             dgvExpedientes.Size = new Size(224, 264);
             dgvExpedientes.TabIndex = 0;
             dgvExpedientes.CellContentDoubleClick += dgvExpedientes_CellContentDoubleClick;
+            dgvExpedientes.MouseDown += dgvExpedientes_MouseDown;
             // 
             // gbxContenido
             // 
@@ -132,6 +133,7 @@
             dgvContenido.TabIndex = 0;
             dgvContenido.CellClick += dgvContenido_CellClick;
             dgvContenido.CellContentClick += dgvContenido_CellContentClick;
+            dgvContenido.MouseDown += dgvContenido_MouseDown;
             // 
             // gbxZipContenido
             // 
@@ -161,6 +163,7 @@
             dgvContenidoZip.RowTemplate.Height = 25;
             dgvContenidoZip.Size = new Size(428, 304);
             dgvContenidoZip.TabIndex = 0;
+            dgvContenidoZip.MouseDown += dgvContenidoZip_MouseDown;
             // 
             // label3
             // 
@@ -223,7 +226,7 @@
             groupBox2.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             groupBox2.Location = new Point(177, 3);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(200, 72);
+            groupBox2.Size = new Size(207, 72);
             groupBox2.TabIndex = 4;
             groupBox2.TabStop = false;
             groupBox2.Text = "Archivo elegido";

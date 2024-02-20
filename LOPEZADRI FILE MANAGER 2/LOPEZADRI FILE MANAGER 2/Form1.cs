@@ -1,7 +1,10 @@
 using LOPEZADRI_FILE_MANAGER_2.Models;
+using Microsoft.VisualBasic.FileIO;
+using Microsoft.VisualBasic;
 using System.Data;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Windows.Forms;
 
 
 namespace LOPEZADRI_FILE_MANAGER_2
@@ -11,7 +14,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         /* Lista que se usa para almacenar los resultados que contenga del metodo de la clase 
         FileHelper */
-        private List<FileHelper> fileHelp;
+        private List<FileHelper>? fileHelp;
 
         private List<FileHelper>? fileHelp2;
 
@@ -35,8 +38,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
             zipHelper = new ZipHelper(zipsDirectoryPath);
 
             zipHelper.CreateZipsDirectory();
-
-
 
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -115,7 +116,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-
         private string? lastClickedCellValue = null;
         string? nestedZipPath;
         string? folderName, cellValue;
@@ -182,15 +182,10 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                                     zipHelper.SearchAndHighlightZipFiles(dgvContenido);
 
-
-                                    //SearchAndHighlightZipFiles();
-
                                     fileHelp2 = FileHelper.LoadPath(nestedZipPath);
 
                                     zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
 
-
-                                    //loadExtractedListZip();
                                 }
                                 else
                                 {
@@ -268,11 +263,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         private void btnAgregar_Click(object sender, EventArgs e)
         {
-            
+
 
             if (rbtzipPrincipal.Checked)
             {
-                MessageBox.Show("Recuerda a cual zip quieres agregar.", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Question);
+
                 if (lastClickedCellValue != null)
                 {
                     // Abrir cuadro de diálogo en la carpeta de documentos
@@ -300,10 +295,9 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
             else if (rbtzipContenido.Checked)
             {
-                MessageBox.Show("Recuerda a cual zip quieres agregar.", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Question);
+
                 if (lastClickedCellValue != null)
                 {
-
                     // Abrir cuadro de diálogo en la carpeta de documentos
                     OpenFileDialog openFileDialog = new OpenFileDialog();
                     openFileDialog.Multiselect = true;
@@ -313,11 +307,12 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     {
                         // Obtener la lista de archivos seleccionados
                         string[] selectedFiles = openFileDialog.FileNames;
-                        //ReplaceInnerZipInOuterZip();
+                        // ReplaceInnerZipInOuterZip();
                         // Agregar archivos al ZIP principal
                         AddFilesToExtractedZip(selectedFiles);
                         ResaltarUltimaCeldaAgregada(dgvContenidoZip);
                     }
+
                 }
                 else
                 {
@@ -340,7 +335,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             {
                 // Ruta del ZIP principal en la carpeta principal
                 string mainZipPath = Path.Combine(folderpath, lastClickedCellValue);
-              
+
                 // Ruta del ZIP temporal
                 string tempZipPath = Path.Combine(Path.GetTempPath(), "temp_zip_" + Guid.NewGuid().ToString() + ".zip");
 
@@ -445,7 +440,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
                             }
                         }
                     }
-
                     // Sustituir el ZIP interno con el ZIP temporal
                     File.Copy(tempZipPath, nestedZipPath, true);
                     ReplaceInnerZipInOuterZip();
@@ -458,7 +452,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
 
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     MessageBox.Show("Selecciona el segundo archivo ZIP.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -466,7 +460,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 {
                     // Eliminar el archivo ZIP temporal interno
                     File.Delete(tempZipPath);
-                   
+
                 }
 
             }
@@ -490,7 +484,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                 // Ruta del nuevo ZIP que quieres agregar al ZIP interno
                 string newInnerZipPath = zipsDirectoryPath + @"\" + folderName + @"\" + lastClickedCellValue;
-                
+
                 // Eliminar el archivo ZIP original
                 File.Delete(outerZipPath);
 
@@ -540,10 +534,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 {
                     label2.Text = cellValue;
                 }
-                else
-                {
-                    MessageBox.Show("Selecciona el archivo ZIP.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+
             }
         }
 
@@ -562,8 +553,274 @@ namespace LOPEZADRI_FILE_MANAGER_2
             dataGridView.FirstDisplayedScrollingRowIndex = ultimaFilaIndex;
         }
 
+        private void dgvExpedientes_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                int rowIndex = dgvExpedientes.HitTest(e.X, e.Y).RowIndex;
+                int columnIndex = dgvExpedientes.HitTest(e.X, e.Y).ColumnIndex;
+
+                Debug.Write(rowIndex + "\n" + columnIndex);
+
+                if (rowIndex >= 0 && columnIndex >= 0)
+                {
+                    dgvExpedientes.CurrentCell = dgvExpedientes.Rows[rowIndex].Cells[columnIndex];
+
+                    ContextMenuStrip menu = new ContextMenuStrip();
+                    ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
+                    eliminarFile.Name = "Eliminar";
+                    eliminarFile.Click += EliminarFileZip_Click;
+
+                    // Obtienes las coordenadas de la celda seleccionada.
+                    Rectangle coordenada = dgvExpedientes.GetCellDisplayRectangle(columnIndex, rowIndex, false);
+
+                    int anchoCelda = coordenada.Location.X; // Ancho de la localización de la celda
+                    int altoCelda = coordenada.Location.Y;  // Alto de la localización de la celda
+
+                    // Y para mostrar el menú lo haces de esta forma:
+                    int X = anchoCelda + dgvExpedientes.Location.X + 145;
+                    int Y = altoCelda;
+
+                    menu.Show(dgvExpedientes, new Point(X, Y));
+                }
+            }
+        }
+
+        private void dgvContenido_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                int rowIndex = dgvContenido.HitTest(e.X, e.Y).RowIndex;
+                int columnIndex = dgvContenido.HitTest(e.X, e.Y).ColumnIndex;
+
+                Debug.Write(rowIndex + "\n" + columnIndex);
+
+                if (rowIndex >= 0 && columnIndex >= 0)
+                {
+                    dgvContenido.CurrentCell = dgvContenido.Rows[rowIndex].Cells[columnIndex];
+
+                    ContextMenuStrip menu = new ContextMenuStrip();
+                    ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
+                    eliminarFile.Name = "Eliminar";
+                    eliminarFile.Click += EliminarFileZip1_Click;
+
+                    // Obtienes las coordenadas de la celda seleccionada.
+                    Rectangle coordenada = dgvContenido.GetCellDisplayRectangle(columnIndex, rowIndex, false);
+
+                    int anchoCelda = coordenada.Location.X; // Ancho de la localización de la celda
+                    int altoCelda = coordenada.Location.Y;  // Alto de la localización de la celda
+
+                    // Y para mostrar el menú lo haces de esta forma:
+                    int X = anchoCelda + dgvContenido.Location.X + 145;
+                    int Y = altoCelda;
+
+                    menu.Show(dgvContenido, new Point(X, Y));
+                }
+            }
+        }
+
+        private void dgvContenidoZip_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                int rowIndex = dgvContenidoZip.HitTest(e.X, e.Y).RowIndex;
+                int columnIndex = dgvContenidoZip.HitTest(e.X, e.Y).ColumnIndex;
+
+                Debug.Write(rowIndex + "\n" + columnIndex);
+
+                if (rowIndex >= 0 && columnIndex >= 0)
+                {
+                    dgvContenidoZip.CurrentCell = dgvContenidoZip.Rows[rowIndex].Cells[columnIndex];
+
+                    ContextMenuStrip menu = new ContextMenuStrip();
+                    ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
+                    eliminarFile.Name = "Eliminar";
+                    eliminarFile.Click += EliminarFileZip2_Click;
+
+                    // Obtienes las coordenadas de la celda seleccionada.
+                    Rectangle coordenada = dgvContenidoZip.GetCellDisplayRectangle(columnIndex, rowIndex, false);
+
+                    int anchoCelda = coordenada.Location.X; // Ancho de la localización de la celda
+                    int altoCelda = coordenada.Location.Y;  // Alto de la localización de la celda
+
+                    // Y para mostrar el menú lo haces de esta forma:
+                    int X = anchoCelda + dgvContenidoZip.Location.X + 145;
+                    int Y = altoCelda;
+
+                    menu.Show(dgvContenidoZip, new Point(X, Y));
+                }
+            }
+        }
+
+        private void EliminarFileZip_Click(object sender, EventArgs e)
+        {
+            // Agrega un cuadro de diálogo para ingresar la contraseña
+            string contrasenaIngresada = PromptForPassword();
+
+            // Verifica si la contraseña ingresada es correcta
+            if (VerificarContrasena(contrasenaIngresada))
+            {
+                DeleteSelectedFile(dgvExpedientes);
+            }
+            else
+            {
+                MessageBox.Show("Contraseña incorrecta. No se permite la eliminación del archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void EliminarFileZip1_Click(object sender, EventArgs e)
+        {
+            // Agrega un cuadro de diálogo para ingresar la contraseña
+            string contrasenaIngresada = PromptForPassword();
+
+            // Verifica si la contraseña ingresada es correcta
+            if (VerificarContrasena(contrasenaIngresada))
+            {
+                DeleteSelectedFile(dgvContenido);
+                
+            }
+            else
+            {
+                MessageBox.Show("Contraseña incorrecta. No se permite la eliminación del archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void EliminarFileZip2_Click(object sender, EventArgs e)
+        {
+            // Agrega un cuadro de diálogo para ingresar la contraseña
+            string contrasenaIngresada = PromptForPassword();
+
+            // Verifica si la contraseña ingresada es correcta
+            if (VerificarContrasena(contrasenaIngresada))
+            {
+                DeleteSelectedFile(dgvContenidoZip);
+            }
+            else
+            {
+                MessageBox.Show("Contraseña incorrecta. No se permite la eliminación del archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void DeleteSelectedFile(DataGridView dataGridView)
+        {
+            if (dataGridView.CurrentCell != null)
+            {
+                int rowIndex = dataGridView.CurrentCell.RowIndex;
+
+                if (rowIndex >= 0)
+                {
+                    if(dataGridView == dgvExpedientes)
+                    {
+                        // Obtener la ruta del archivo desde la celda del DataGridView
+                        string rutaArchivo = dataGridView.Rows[rowIndex].Cells["Ruta"].Value.ToString();
+
+                        // Eliminar el archivo físico si la ruta existe
+                        if (File.Exists(rutaArchivo))
+                        {
+                            try
+                            {
+                                File.Delete(rutaArchivo);
+
+                                dataGridView.Rows.RemoveAt(rowIndex);
+
+                                MessageBox.Show("Archivo eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Error al eliminar el archivo: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("El archivo no existe en la ruta especificada.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
+                    }
+                    if(dataGridView == dgvContenido)
+                    {
+                        // Validar si hay un ZIP principal seleccionado
+                        if (lastClickedCellValue != null)
+                        {
+                            // Ruta del ZIP principal en la carpeta principal
+                            string mainZipPath = Path.Combine(folderpath, cellValue);
+                            
+                            Debug.WriteLine(mainZipPath);
+
+                            string tempZipFilePath = Path.GetTempFileName();
+
+                            // Ruta del ZIP temporal
+                            try
+                            {
+                                // Copiar el ZIP principal al temporal
+                                File.Copy(mainZipPath, tempZipFilePath, true);
+                                string rutaEliminar = lastClickedCellValue;
+
+                                using (ZipArchive zipArchive = ZipFile.Open(tempZipFilePath, ZipArchiveMode.Update))
+                                {
+                                    // Buscar y eliminar el archivo dentro del ZIP
+                                    ZipArchiveEntry entryToRemove = zipArchive.GetEntry(rutaEliminar);
+                                    if (entryToRemove != null)
+                                    {
+                                        entryToRemove.Delete();
+                                       
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("No existe tal archivo");
+                                    }
+                                }
+
+                                // Reemplazar el archivo ZIP original con la versión modificada
+                                File.Copy(tempZipFilePath, mainZipPath, true);
 
 
+                                fileHelp = FileHelper.LoadPath(mainZipPath);
+
+                                loadExtractedList();
+
+                                zipHelper.SearchAndHighlightZipFiles(dgvContenido);
+
+                                fileHelp2 = FileHelper.LoadPath(nestedZipPath);
+
+                                zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
+
+                            }
+                            catch (Exception)
+                            {
+                                MessageBox.Show("error");
+                            }
+                            finally
+                            {
+                                // Eliminar el archivo ZIP temporal
+                                File.Delete(tempZipFilePath);
+                            }
+
+
+
+                        }
+                    }
+
+                    
+                }
+            }
+        }
+
+        // Método para solicitar la contraseña al usuario
+        private string PromptForPassword()
+        {
+            string contrasenaIngresada = Interaction.InputBox("Ingrese la contraseña:", "Contraseña", "");
+
+            return contrasenaIngresada;
+
+        }
+        // Método para verificar la contraseña
+        private bool VerificarContrasena(string contrasenaIngresada)
+        {
+
+            string contrasenaCorrecta = "Hola123"; // Reemplaza con tu propia contraseña
+
+            return contrasenaIngresada == contrasenaCorrecta;
+        }
     }
 
 }

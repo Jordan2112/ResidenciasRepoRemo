@@ -18,7 +18,7 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
 
         /*Metodo el cual carga los archivos de un directorio en especifico con base a una ruta 
         proporcionado en la clase de la forma*/
-        public static List<FileHelper> LoadPath(string folderPath)
+        public static List<FileHelper>? LoadPath(string folderPath)
         {
             /* Lista para almacenar los archivos y carpetas y agregarlos a una lista la cual será retornada */
             List<FileHelper> fileList = new List<FileHelper>();
