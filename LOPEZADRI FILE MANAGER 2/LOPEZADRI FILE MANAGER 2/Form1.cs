@@ -176,6 +176,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                     // Ruta del zip principal
                                     string path = folderpath + cellValue;
 
+                                    label2.BackColor = Color.Yellow;
                                     fileHelp = FileHelper.LoadPath(path);
 
                                     loadExtractedList();
@@ -388,7 +389,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 }
                 catch (Exception)
                 {
-                    MessageBox.Show("error");
+                    MessageBox.Show("Error al agregar", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 finally
                 {
@@ -533,6 +534,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 if (!string.IsNullOrEmpty(cellValue) && cellValue.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
                 {
                     label2.Text = cellValue;
+                    label2.BackColor = Color.GreenYellow;
+
                 }
 
             }
@@ -677,7 +680,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             if (VerificarContrasena(contrasenaIngresada))
             {
                 DeleteSelectedFile(dgvContenido);
-                
+
             }
             else
             {
@@ -700,7 +703,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 MessageBox.Show("Contraseña incorrecta. No se permite la eliminación del archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
+        string dleteZip = "";
         private void DeleteSelectedFile(DataGridView dataGridView)
         {
             if (dataGridView.CurrentCell != null)
@@ -709,7 +712,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                 if (rowIndex >= 0)
                 {
-                    if(dataGridView == dgvExpedientes)
+                    if (dataGridView == dgvExpedientes)
                     {
                         // Obtener la ruta del archivo desde la celda del DataGridView
                         string rutaArchivo = dataGridView.Rows[rowIndex].Cells["Ruta"].Value.ToString();
@@ -736,14 +739,14 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         }
 
                     }
-                    if(dataGridView == dgvContenido)
+                    if (dataGridView == dgvContenido)
                     {
                         // Validar si hay un ZIP principal seleccionado
                         if (lastClickedCellValue != null)
                         {
                             // Ruta del ZIP principal en la carpeta principal
                             string mainZipPath = Path.Combine(folderpath, cellValue);
-                            
+
                             Debug.WriteLine(mainZipPath);
 
                             string tempZipFilePath = Path.GetTempFileName();
@@ -762,7 +765,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                     if (entryToRemove != null)
                                     {
                                         entryToRemove.Delete();
-                                       
+
                                     }
                                     else
                                     {
@@ -779,6 +782,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 loadExtractedList();
 
                                 zipHelper.SearchAndHighlightZipFiles(dgvContenido);
+
 
                                 fileHelp2 = FileHelper.LoadPath(nestedZipPath);
 
@@ -799,8 +803,66 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                         }
                     }
+                    if (dataGridView == dgvContenidoZip)
+                    {
+                        if (lastClickedCellValue != null)
+                        {
+                            // Ruta del ZIP principal en la carpeta principal
+                            string nestedZipPath = Path.Combine(zipsDirectoryPath, folderName, lastClickedCellValue);
+                            string rutaActualizar = Path.Combine(folderpath, folderName + @".zip");
+                            Debug.WriteLine(rutaActualizar);
 
-                    
+                            string tempZipFilePath = Path.GetTempFileName();
+
+                            try
+                            {
+                                // Copiar el ZIP principal al temporal
+                                File.Copy(nestedZipPath, tempZipFilePath, true);
+
+                                string rutaEliminar = dleteZip;
+
+                                using (ZipArchive zipArchive = ZipFile.Open(tempZipFilePath, ZipArchiveMode.Update))
+                                {
+                                    // Buscar y eliminar el archivo dentro del ZIP
+                                    ZipArchiveEntry entryToRemove = zipArchive.GetEntry(rutaEliminar);
+                                    if (entryToRemove != null)
+                                    {
+                                        entryToRemove.Delete();
+
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("No existe tal archivo");
+                                    }
+                                }
+
+                                // Reemplazar el archivo ZIP original con la versión modificada
+                                File.Copy(tempZipFilePath, nestedZipPath, true);
+                                ReplaceInnerZipInOuterZip();
+
+                                fileHelp = FileHelper.LoadPath(rutaActualizar);
+
+                                loadExtractedList();
+                                Debug.WriteLine(nestedZipPath);
+                                fileHelp2 = FileHelper.LoadPath(nestedZipPath);
+
+                                zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
+
+                            }
+                            catch (Exception)
+                            {
+                                MessageBox.Show("Selecciona el segundo zip.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            finally
+                            {
+                                // Eliminar el archivo ZIP temporal
+                                File.Delete(tempZipFilePath);
+                            }
+
+                        }
+
+                    }
+
                 }
             }
         }
@@ -820,6 +882,20 @@ namespace LOPEZADRI_FILE_MANAGER_2
             string contrasenaCorrecta = "Hola123"; // Reemplaza con tu propia contraseña
 
             return contrasenaIngresada == contrasenaCorrecta;
+        }
+
+        private void dgvContenidoZip_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // Verificar si se hizo clic derecho
+            if (e.Button == MouseButtons.Right)
+            {
+                // Verificar si la celda seleccionada es válida
+                if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+                {
+                    // Obtener el contenido de la celda seleccionada
+                    dleteZip = dgvContenidoZip.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+                }
+            }
         }
     }
 

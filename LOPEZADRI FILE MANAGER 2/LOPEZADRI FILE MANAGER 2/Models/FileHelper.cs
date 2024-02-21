@@ -101,15 +101,5 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             return dataTable;
         }
 
-        public static bool ZipContainsFile(string zipPath, string fileName)
-        {
-            using (ZipArchive archive = ZipFile.OpenRead(zipPath))
-            {
-                return archive.Entries.Any(entry => entry.FullName.Equals(fileName, StringComparison.OrdinalIgnoreCase));
-            }
-        }
-
-
-
     }
 }

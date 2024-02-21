@@ -163,6 +163,7 @@
             dgvContenidoZip.RowTemplate.Height = 25;
             dgvContenidoZip.Size = new Size(428, 304);
             dgvContenidoZip.TabIndex = 0;
+            dgvContenidoZip.CellMouseClick += dgvContenidoZip_CellMouseClick;
             dgvContenidoZip.MouseDown += dgvContenidoZip_MouseDown;
             // 
             // label3
@@ -234,6 +235,7 @@
             // label2
             // 
             label2.AutoSize = true;
+            label2.BackColor = SystemColors.Control;
             label2.BorderStyle = BorderStyle.Fixed3D;
             label2.Location = new Point(31, 32);
             label2.Name = "label2";
