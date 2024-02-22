@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Windows.Forms;
+using System.Reflection.Emit;
 
 
 namespace LOPEZADRI_FILE_MANAGER_2
@@ -24,6 +25,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
         string folderpath = @"c:\users\lopezadri\desktop\expedientes\";
 
         private string zipsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "ZIPS");
+
         int bandera;
 
         public Form1()
@@ -119,6 +121,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
         private string? lastClickedCellValue = null;
         string? nestedZipPath;
         string? folderName, cellValue;
+        string? nameFile;
+        string[]? elementos;
         private void dgvExpedientes_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
 
@@ -136,7 +140,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 cellValue = (string)dgvExpedientes.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
 
                 label2.Text = cellValue;
-
+               
 
                 // Realizar la acción deseada solo si el contenido de la celda no es nulo
                 if (cellValue != null)
@@ -149,6 +153,9 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                         // Crear una carpeta con el nombre del archivo (sin la extensión .zip) dentro de "ZIPS"
                         folderName = Path.GetFileNameWithoutExtension(cellValue);
+                        nameFile = folderName;
+                        Debug.Write(nameFile);
+
                         string zipsFolder = Path.Combine(zipsDirectoryPath, folderName);
 
                         // Verificar si es la misma celda que la última clicada
@@ -220,7 +227,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                     // Mostrar la lista de archivos del ZIP
                                     zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
 
-                                    //loadExtractedListZip();
                                 }
                             }
                             else
@@ -264,11 +270,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         private void btnAgregar_Click(object sender, EventArgs e)
         {
-
-
             if (rbtzipPrincipal.Checked)
             {
-
                 if (lastClickedCellValue != null)
                 {
                     // Abrir cuadro de diálogo en la carpeta de documentos
@@ -346,7 +349,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     File.Copy(mainZipPath, tempZipPath, true);
 
                     // Extraer archivos actuales del ZIP principal
-                    List<FileHelper> currentFiles = FileHelper.LoadPath(tempZipPath);
+                    List<FileHelper>? currentFiles = FileHelper.LoadPath(tempZipPath);
 
                     // Abrir el archivo ZIP temporal
                     using (ZipArchive archive = ZipFile.Open(tempZipPath, ZipArchiveMode.Update))
@@ -385,6 +388,10 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     fileHelp2 = FileHelper.LoadPath(nestedZipPath);
 
                     zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
+                    elementos = nameFile.Split(' ');
+                    lblPatente.Text = elementos.Length > 0 ? elementos[0] : "No hay elemento";
+                    lblAduana.Text = elementos.Length > 1 ? elementos[1] : "No hay elemento";
+                    lblPedimento.Text = elementos.Length > 2 ? elementos[2] : "No hay elemento";
 
                 }
                 catch (Exception)
@@ -418,7 +425,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     File.Copy(nestedZipPath, tempZipPath, true);
 
                     // Extraer archivos actuales del ZIP interno
-                    List<FileHelper> currentNestedFiles = FileHelper.LoadPath(tempZipPath);
+                    List<FileHelper>? currentNestedFiles = FileHelper.LoadPath(tempZipPath);
 
                     // Abrir el archivo ZIP temporal interno
                     using (ZipArchive nestedArchive = ZipFile.Open(tempZipPath, ZipArchiveMode.Update))
@@ -703,7 +710,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 MessageBox.Show("Contraseña incorrecta. No se permite la eliminación del archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        string dleteZip = "";
+        string? dleteZip = "";
         private void DeleteSelectedFile(DataGridView dataGridView)
         {
             if (dataGridView.CurrentCell != null)
@@ -715,7 +722,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     if (dataGridView == dgvExpedientes)
                     {
                         // Obtener la ruta del archivo desde la celda del DataGridView
-                        string rutaArchivo = dataGridView.Rows[rowIndex].Cells["Ruta"].Value.ToString();
+                        string? rutaArchivo = dataGridView.Rows[rowIndex].Cells["Ruta"].Value.ToString();
 
                         // Eliminar el archivo físico si la ruta existe
                         if (File.Exists(rutaArchivo))
@@ -761,7 +768,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 using (ZipArchive zipArchive = ZipFile.Open(tempZipFilePath, ZipArchiveMode.Update))
                                 {
                                     // Buscar y eliminar el archivo dentro del ZIP
-                                    ZipArchiveEntry entryToRemove = zipArchive.GetEntry(rutaEliminar);
+                                    ZipArchiveEntry? entryToRemove = zipArchive.GetEntry(rutaEliminar);
                                     if (entryToRemove != null)
                                     {
                                         entryToRemove.Delete();
@@ -819,12 +826,12 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 // Copiar el ZIP principal al temporal
                                 File.Copy(nestedZipPath, tempZipFilePath, true);
 
-                                string rutaEliminar = dleteZip;
+                                string? rutaEliminar = dleteZip;
 
                                 using (ZipArchive zipArchive = ZipFile.Open(tempZipFilePath, ZipArchiveMode.Update))
                                 {
                                     // Buscar y eliminar el archivo dentro del ZIP
-                                    ZipArchiveEntry entryToRemove = zipArchive.GetEntry(rutaEliminar);
+                                    ZipArchiveEntry? entryToRemove = zipArchive.GetEntry(rutaEliminar);
                                     if (entryToRemove != null)
                                     {
                                         entryToRemove.Delete();

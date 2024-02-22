@@ -43,6 +43,10 @@
             btnAgregar = new Button();
             groupBox2 = new GroupBox();
             label2 = new Label();
+            label4 = new Label();
+            lblPatente = new Label();
+            lblAduana = new Label();
+            lblPedimento = new Label();
             gbxExpedientes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvExpedientes).BeginInit();
             gbxContenido.SuspendLayout();
@@ -59,12 +63,12 @@
             gbxExpedientes.Controls.Add(label1);
             gbxExpedientes.Controls.Add(dgvExpedientes);
             gbxExpedientes.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            gbxExpedientes.Location = new Point(12, 149);
+            gbxExpedientes.Location = new Point(12, 78);
             gbxExpedientes.Name = "gbxExpedientes";
-            gbxExpedientes.Size = new Size(238, 335);
+            gbxExpedientes.Size = new Size(244, 406);
             gbxExpedientes.TabIndex = 1;
             gbxExpedientes.TabStop = false;
-            gbxExpedientes.Text = "EXPEDIENTES";
+            gbxExpedientes.Text = "EXPEDIENTES OPERATIVOS";
             // 
             // txtFiltro
             // 
@@ -98,7 +102,7 @@
             dgvExpedientes.ReadOnly = true;
             dgvExpedientes.RowHeadersVisible = false;
             dgvExpedientes.RowTemplate.Height = 25;
-            dgvExpedientes.Size = new Size(224, 264);
+            dgvExpedientes.Size = new Size(232, 335);
             dgvExpedientes.TabIndex = 0;
             dgvExpedientes.CellContentDoubleClick += dgvExpedientes_CellContentDoubleClick;
             dgvExpedientes.MouseDown += dgvExpedientes_MouseDown;
@@ -107,12 +111,12 @@
             // 
             gbxContenido.Controls.Add(dgvContenido);
             gbxContenido.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            gbxContenido.Location = new Point(256, 149);
+            gbxContenido.Location = new Point(262, 149);
             gbxContenido.Name = "gbxContenido";
             gbxContenido.Size = new Size(245, 335);
             gbxContenido.TabIndex = 2;
             gbxContenido.TabStop = false;
-            gbxContenido.Text = "CONTENIDO";
+            gbxContenido.Text = "CONTENIDO PRINCIPAL";
             // 
             // dgvContenido
             // 
@@ -139,12 +143,12 @@
             // 
             gbxZipContenido.Controls.Add(dgvContenidoZip);
             gbxZipContenido.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            gbxZipContenido.Location = new Point(507, 149);
+            gbxZipContenido.Location = new Point(512, 149);
             gbxZipContenido.Name = "gbxZipContenido";
             gbxZipContenido.Size = new Size(440, 335);
             gbxZipContenido.TabIndex = 3;
             gbxZipContenido.TabStop = false;
-            gbxZipContenido.Text = "ZIPCONTENIDO";
+            gbxZipContenido.Text = "CONTENIDO SECUNDARIO";
             // 
             // dgvContenidoZip
             // 
@@ -181,7 +185,7 @@
             groupBox1.Controls.Add(btnAgregar);
             groupBox1.Controls.Add(label3);
             groupBox1.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            groupBox1.Location = new Point(12, 3);
+            groupBox1.Location = new Point(262, 3);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(159, 140);
             groupBox1.TabIndex = 0;
@@ -195,13 +199,13 @@
             rbtzipContenido.Name = "rbtzipContenido";
             rbtzipContenido.Size = new Size(118, 21);
             rbtzipContenido.TabIndex = 5;
-            rbtzipContenido.TabStop = true;
             rbtzipContenido.Text = "Zip Secundario";
             rbtzipContenido.UseVisualStyleBackColor = true;
             // 
             // rbtzipPrincipal
             // 
             rbtzipPrincipal.AutoSize = true;
+            rbtzipPrincipal.Checked = true;
             rbtzipPrincipal.Location = new Point(23, 28);
             rbtzipPrincipal.Name = "rbtzipPrincipal";
             rbtzipPrincipal.Size = new Size(104, 21);
@@ -225,9 +229,9 @@
             groupBox2.Controls.Add(label2);
             groupBox2.FlatStyle = FlatStyle.Popup;
             groupBox2.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            groupBox2.Location = new Point(177, 3);
+            groupBox2.Location = new Point(12, 7);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(207, 72);
+            groupBox2.Size = new Size(244, 65);
             groupBox2.TabIndex = 4;
             groupBox2.TabStop = false;
             groupBox2.Text = "Archivo elegido";
@@ -237,21 +241,65 @@
             label2.AutoSize = true;
             label2.BackColor = SystemColors.Control;
             label2.BorderStyle = BorderStyle.Fixed3D;
-            label2.Location = new Point(31, 32);
+            label2.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            label2.Location = new Point(30, 24);
             label2.Name = "label2";
-            label2.Size = new Size(2, 19);
+            label2.Size = new Size(173, 23);
             label2.TabIndex = 0;
+            label2.Text = "19547 254 168742.zip";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            label4.Location = new Point(802, 9);
+            label4.Name = "label4";
+            label4.Size = new Size(78, 21);
+            label4.TabIndex = 5;
+            label4.Text = "Usuario1";
+            // 
+            // lblPatente
+            // 
+            lblPatente.AutoSize = true;
+            lblPatente.Location = new Point(759, 60);
+            lblPatente.Name = "lblPatente";
+            lblPatente.Size = new Size(47, 15);
+            lblPatente.TabIndex = 6;
+            lblPatente.Text = "Patente";
+            // 
+            // lblAduana
+            // 
+            lblAduana.AutoSize = true;
+            lblAduana.Location = new Point(812, 59);
+            lblAduana.Name = "lblAduana";
+            lblAduana.Size = new Size(48, 15);
+            lblAduana.TabIndex = 7;
+            lblAduana.Text = "Aduana";
+            // 
+            // lblPedimento
+            // 
+            lblPedimento.AutoSize = true;
+            lblPedimento.Location = new Point(866, 60);
+            lblPedimento.Name = "lblPedimento";
+            lblPedimento.Size = new Size(71, 15);
+            lblPedimento.TabIndex = 8;
+            lblPedimento.Text = "Pedimiento ";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(956, 496);
+            ClientSize = new Size(964, 496);
+            Controls.Add(lblPedimento);
+            Controls.Add(lblAduana);
+            Controls.Add(lblPatente);
+            Controls.Add(label4);
             Controls.Add(groupBox2);
             Controls.Add(gbxZipContenido);
             Controls.Add(gbxContenido);
             Controls.Add(gbxExpedientes);
             Controls.Add(groupBox1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;
@@ -267,6 +315,7 @@
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -285,5 +334,9 @@
         private RadioButton rbtzipPrincipal;
         private GroupBox groupBox2;
         private Label label2;
+        private Label label4;
+        private Label lblPatente;
+        private Label lblAduana;
+        private Label lblPedimento;
     }
 }
