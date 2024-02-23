@@ -6,6 +6,10 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Windows.Forms;
 using System.Reflection.Emit;
+using System.Configuration;
+using System;
+using System.Data.SqlClient;
+
 
 
 namespace LOPEZADRI_FILE_MANAGER_2
@@ -27,6 +31,28 @@ namespace LOPEZADRI_FILE_MANAGER_2
         private string zipsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "ZIPS");
 
         int bandera;
+
+        private string? lastClickedCellValue = null;
+
+        string? nestedZipPath;
+
+        string? folderName, cellValue;
+
+        string? nameFile;
+
+        string[]? elementos;
+
+        static string conn = ConfigurationManager.ConnectionStrings["LOCAL"].ConnectionString;
+
+        List<string> nombresArchivosAgregados = new List<string>();
+
+        string? dleteZip = "";
+
+        string? patente;
+
+        string? aduana;
+
+        string? pedimento;
 
         public Form1()
         {
@@ -118,11 +144,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-        private string? lastClickedCellValue = null;
-        string? nestedZipPath;
-        string? folderName, cellValue;
-        string? nameFile;
-        string[]? elementos;
+
         private void dgvExpedientes_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
 
@@ -140,7 +162,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 cellValue = (string)dgvExpedientes.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
 
                 label2.Text = cellValue;
-               
 
                 // Realizar la acción deseada solo si el contenido de la celda no es nulo
                 if (cellValue != null)
@@ -268,8 +289,10 @@ namespace LOPEZADRI_FILE_MANAGER_2
         }
 
 
+
         private void btnAgregar_Click(object sender, EventArgs e)
         {
+
             if (rbtzipPrincipal.Checked)
             {
                 if (lastClickedCellValue != null)
@@ -284,9 +307,26 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         // Obtener la lista de archivos seleccionados
                         string[] selectedFiles = openFileDialog.FileNames;
 
+                        try
+                        {
+                            AddFilesToMainZip(selectedFiles);
+                        }
+                        catch (Exception)
+                        {
+                            // Manejar la excepción específica de AddFilesToExtractedZip
+                            MessageBox.Show($"Selecciona el primer archivo zip", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;  // Puedes decidir si quieres salir del método o realizar alguna otra acción en caso de excepción.
+                        }
+
                         // Agregar archivos al ZIP principal
-                        AddFilesToMainZip(selectedFiles);
+                       
                         ResaltarUltimaCeldaAgregada(dgvContenido);
+
+                        BdActions gestorBD = new BdActions(conn);
+
+                        gestorBD.AgregarRegistro(patente, aduana, pedimento, "Agrego", nombresArchivosAgregados, lblUsuario.Text, null);
+
+                        MessageBox.Show("Archivo agregado correctamente al ZIP.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     }
                 }
@@ -311,10 +351,25 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     {
                         // Obtener la lista de archivos seleccionados
                         string[] selectedFiles = openFileDialog.FileNames;
-                        // ReplaceInnerZipInOuterZip();
-                        // Agregar archivos al ZIP principal
-                        AddFilesToExtractedZip(selectedFiles);
+
+                        try
+                        {
+                            AddFilesToExtractedZip(selectedFiles);
+                        }
+                        catch (Exception)
+                        {
+                            // Manejar la excepción específica de AddFilesToExtractedZip
+                            MessageBox.Show($"Selecciona el segundo archivo zip", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;  // Puedes decidir si quieres salir del método o realizar alguna otra acción en caso de excepción.
+                        }
+
                         ResaltarUltimaCeldaAgregada(dgvContenidoZip);
+
+                        BdActions gestorBD = new BdActions(conn);
+                        string zipV = patente  +  @" " + aduana + @" " + pedimento + @" " + @"-V";
+                        gestorBD.AgregarRegistro(patente, aduana, pedimento, "Agrego", nombresArchivosAgregados, lblUsuario.Text, zipV);
+
+                        MessageBox.Show("Archivo agregado correctamente al ZIP.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
                 }
@@ -332,19 +387,21 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
+
+
         private void AddFilesToMainZip(string[] files)
         {
             // Validar si hay un ZIP principal seleccionado
             if (lastClickedCellValue != null)
             {
                 // Ruta del ZIP principal en la carpeta principal
-                string mainZipPath = Path.Combine(folderpath, lastClickedCellValue);
+                string mainZipPath = Path.Combine(folderpath, label2.Text);
 
                 // Ruta del ZIP temporal
                 string tempZipPath = Path.Combine(Path.GetTempPath(), "temp_zip_" + Guid.NewGuid().ToString() + ".zip");
 
-                try
-                {
+                //try
+                //{
                     // Copiar el ZIP principal al temporal
                     File.Copy(mainZipPath, tempZipPath, true);
 
@@ -364,6 +421,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
                             {
                                 // Crear una nueva entrada en el ZIP y extraer el archivo
                                 ZipArchiveEntry entry = archive.CreateEntry(fileName);
+                                nombresArchivosAgregados.Add(fileName);
+
                                 using (Stream entryStream = entry.Open())
                                 using (FileStream fileStream = File.OpenRead(filePath))
                                 {
@@ -377,7 +436,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     // Sustituir el ZIP principal con el ZIP temporal
                     File.Copy(tempZipPath, mainZipPath, true);
 
-                    MessageBox.Show("Archivo agregado correctamente.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    //MessageBox.Show("Archivo agregado correctamente.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     fileHelp = FileHelper.LoadPath(mainZipPath);
 
@@ -389,20 +448,23 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                     zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
                     elementos = nameFile.Split(' ');
-                    lblPatente.Text = elementos.Length > 0 ? elementos[0] : "No hay elemento";
-                    lblAduana.Text = elementos.Length > 1 ? elementos[1] : "No hay elemento";
-                    lblPedimento.Text = elementos.Length > 2 ? elementos[2] : "No hay elemento";
+                    patente = elementos.Length > 0 ? elementos[0] : "No hay elemento";
+                    aduana = elementos.Length > 1 ? elementos[1] : "No hay elemento";
+                    pedimento = elementos.Length > 2 ? elementos[2] : "No hay elemento";
 
-                }
-                catch (Exception)
+                //}
+                //catch (Exception ex)
+                //{
+                //    MessageBox.Show("Error al agregar \n" + ex.Message, "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //}
+                //finally
+                //{
+                if(File.Exists(tempZipPath))
                 {
-                    MessageBox.Show("Error al agregar", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                finally
-                {
-                    // Eliminar el archivo ZIP temporal
                     File.Delete(tempZipPath);
                 }
+                    
+                //}
 
             }
         }
@@ -419,8 +481,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 // Ruta del ZIP temporal
                 string tempZipPath = Path.Combine(Path.GetTempPath(), "temp_nested_zip_" + Guid.NewGuid().ToString() + ".zip");
 
-                try
-                {
+                //try
+                //{
                     // Copiar el ZIP interno al temporal
                     File.Copy(nestedZipPath, tempZipPath, true);
 
@@ -440,6 +502,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                             {
                                 // Crear una nueva entrada en el ZIP interno y extraer el archivo
                                 ZipArchiveEntry nestedEntry = nestedArchive.CreateEntry(fileName);
+                                nombresArchivosAgregados.Add(fileName);
                                 using (Stream entryStream = nestedEntry.Open())
                                 using (FileStream fileStream = File.OpenRead(filePath))
                                 {
@@ -452,23 +515,35 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     File.Copy(tempZipPath, nestedZipPath, true);
                     ReplaceInnerZipInOuterZip();
 
-                    MessageBox.Show("Archivo agregado correctamente al ZIP interno.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    //MessageBox.Show("Archivo agregado correctamente al ZIP interno.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     // Vuelve a cargar la lista de archivos extraídos
                     fileHelp2 = FileHelper.LoadPath(nestedZipPath);
                     zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
 
+                    elementos = nameFile.Split(' ');
+                    patente = elementos.Length > 0 ? elementos[0] : "No hay elemento";
+                    aduana = elementos.Length > 1 ? elementos[1] : "No hay elemento";
+                    pedimento = elementos.Length > 2 ? elementos[2] : "No hay elemento";
 
-                }
-                catch (Exception)
+
+
+
+                //}
+                //catch (Exception)
+                //{
+                //    MessageBox.Show("Selecciona el segundo archivo ZIP.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //}
+                //finally
+                //{
+                //    // Eliminar el archivo ZIP temporal interno
+                //    File.Delete(tempZipPath);
+
+                //}
+
+                if(File.Exists(tempZipPath))
                 {
-                    MessageBox.Show("Selecciona el segundo archivo ZIP.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    // Eliminar el archivo ZIP temporal interno
                     File.Delete(tempZipPath);
-
                 }
 
             }
@@ -664,53 +739,28 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         private void EliminarFileZip_Click(object sender, EventArgs e)
         {
-            // Agrega un cuadro de diálogo para ingresar la contraseña
-            string contrasenaIngresada = PromptForPassword();
 
-            // Verifica si la contraseña ingresada es correcta
-            if (VerificarContrasena(contrasenaIngresada))
-            {
-                DeleteSelectedFile(dgvExpedientes);
-            }
-            else
-            {
-                MessageBox.Show("Contraseña incorrecta. No se permite la eliminación del archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            DeleteSelectedFile(dgvExpedientes);
+
         }
 
         private void EliminarFileZip1_Click(object sender, EventArgs e)
         {
             // Agrega un cuadro de diálogo para ingresar la contraseña
-            string contrasenaIngresada = PromptForPassword();
 
-            // Verifica si la contraseña ingresada es correcta
-            if (VerificarContrasena(contrasenaIngresada))
-            {
-                DeleteSelectedFile(dgvContenido);
+            DeleteSelectedFile(dgvContenido);
 
-            }
-            else
-            {
-                MessageBox.Show("Contraseña incorrecta. No se permite la eliminación del archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+
         }
 
         private void EliminarFileZip2_Click(object sender, EventArgs e)
         {
             // Agrega un cuadro de diálogo para ingresar la contraseña
-            string contrasenaIngresada = PromptForPassword();
 
-            // Verifica si la contraseña ingresada es correcta
-            if (VerificarContrasena(contrasenaIngresada))
-            {
-                DeleteSelectedFile(dgvContenidoZip);
-            }
-            else
-            {
-                MessageBox.Show("Contraseña incorrecta. No se permite la eliminación del archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            DeleteSelectedFile(dgvContenidoZip);
+
         }
-        string? dleteZip = "";
+
         private void DeleteSelectedFile(DataGridView dataGridView)
         {
             if (dataGridView.CurrentCell != null)
@@ -763,7 +813,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                             {
                                 // Copiar el ZIP principal al temporal
                                 File.Copy(mainZipPath, tempZipFilePath, true);
-                                string rutaEliminar = lastClickedCellValue;
+                                string? rutaEliminar = dleteZip;
 
                                 using (ZipArchive zipArchive = ZipFile.Open(tempZipFilePath, ZipArchiveMode.Update))
                                 {
@@ -874,23 +924,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-        // Método para solicitar la contraseña al usuario
-        private string PromptForPassword()
-        {
-            string contrasenaIngresada = Interaction.InputBox("Ingrese la contraseña:", "Contraseña", "");
-
-            return contrasenaIngresada;
-
-        }
-        // Método para verificar la contraseña
-        private bool VerificarContrasena(string contrasenaIngresada)
-        {
-
-            string contrasenaCorrecta = "Hola123"; // Reemplaza con tu propia contraseña
-
-            return contrasenaIngresada == contrasenaCorrecta;
-        }
-
         private void dgvContenidoZip_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             // Verificar si se hizo clic derecho
@@ -901,6 +934,19 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 {
                     // Obtener el contenido de la celda seleccionada
                     dleteZip = dgvContenidoZip.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+                }
+            }
+        }
+
+        private void dgvContenido_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                // Verificar si la celda seleccionada es válida
+                if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+                {
+                    // Obtener el contenido de la celda seleccionada
+                    dleteZip = dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
                 }
             }
         }

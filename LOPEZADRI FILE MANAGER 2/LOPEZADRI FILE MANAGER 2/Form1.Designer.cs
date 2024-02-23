@@ -43,7 +43,7 @@
             btnAgregar = new Button();
             groupBox2 = new GroupBox();
             label2 = new Label();
-            label4 = new Label();
+            lblUsuario = new Label();
             lblPatente = new Label();
             lblAduana = new Label();
             lblPedimento = new Label();
@@ -137,6 +137,7 @@
             dgvContenido.TabIndex = 0;
             dgvContenido.CellClick += dgvContenido_CellClick;
             dgvContenido.CellContentClick += dgvContenido_CellContentClick;
+            dgvContenido.CellMouseClick += dgvContenido_CellMouseClick;
             dgvContenido.MouseDown += dgvContenido_MouseDown;
             // 
             // gbxZipContenido
@@ -248,15 +249,15 @@
             label2.TabIndex = 0;
             label2.Text = "19547 254 168742.zip";
             // 
-            // label4
+            // lblUsuario
             // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            label4.Location = new Point(802, 9);
-            label4.Name = "label4";
-            label4.Size = new Size(78, 21);
-            label4.TabIndex = 5;
-            label4.Text = "Usuario1";
+            lblUsuario.AutoSize = true;
+            lblUsuario.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            lblUsuario.Location = new Point(802, 9);
+            lblUsuario.Name = "lblUsuario";
+            lblUsuario.Size = new Size(78, 21);
+            lblUsuario.TabIndex = 5;
+            lblUsuario.Text = "Usuario1";
             // 
             // lblPatente
             // 
@@ -293,7 +294,7 @@
             Controls.Add(lblPedimento);
             Controls.Add(lblAduana);
             Controls.Add(lblPatente);
-            Controls.Add(label4);
+            Controls.Add(lblUsuario);
             Controls.Add(groupBox2);
             Controls.Add(gbxZipContenido);
             Controls.Add(gbxContenido);
@@ -334,7 +335,7 @@
         private RadioButton rbtzipPrincipal;
         private GroupBox groupBox2;
         private Label label2;
-        private Label label4;
+        private Label lblUsuario;
         private Label lblPatente;
         private Label lblAduana;
         private Label lblPedimento;
