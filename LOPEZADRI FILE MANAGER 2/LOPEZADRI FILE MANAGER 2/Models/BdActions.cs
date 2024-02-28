@@ -36,7 +36,15 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
 
                         // Concatenar los nombres de archivos en una cadena separada por comas
                         string nombresArchivosConcatenados = string.Join(", ", nombresArchivos);
-                        command.Parameters.Add(new SqlParameter("@Valor5", zipV +" " + nombresArchivosConcatenados));
+
+                        if(zipV == null)
+                        {
+                            command.Parameters.Add(new SqlParameter("@Valor5", nombresArchivosConcatenados));
+                        }
+                        else
+                        {
+                            command.Parameters.Add(new SqlParameter("@Valor5", zipV + " --> " + nombresArchivosConcatenados));
+                        }
 
                         command.Parameters.Add(new SqlParameter("@Valor6", usuario));
 

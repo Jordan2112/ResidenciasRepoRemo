@@ -44,9 +44,6 @@
             groupBox2 = new GroupBox();
             label2 = new Label();
             lblUsuario = new Label();
-            lblPatente = new Label();
-            lblAduana = new Label();
-            lblPedimento = new Label();
             gbxExpedientes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvExpedientes).BeginInit();
             gbxContenido.SuspendLayout();
@@ -235,7 +232,7 @@
             groupBox2.Size = new Size(244, 65);
             groupBox2.TabIndex = 4;
             groupBox2.TabStop = false;
-            groupBox2.Text = "Archivo elegido";
+            groupBox2.Text = "Zip elegido";
             // 
             // label2
             // 
@@ -243,57 +240,27 @@
             label2.BackColor = SystemColors.Control;
             label2.BorderStyle = BorderStyle.Fixed3D;
             label2.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            label2.Location = new Point(30, 24);
+            label2.Location = new Point(35, 24);
             label2.Name = "label2";
             label2.Size = new Size(173, 23);
             label2.TabIndex = 0;
-            label2.Text = "19547 254 168742.zip";
+            label2.Text = "1684 240 4000002.zip";
             // 
             // lblUsuario
             // 
             lblUsuario.AutoSize = true;
             lblUsuario.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            lblUsuario.Location = new Point(802, 9);
+            lblUsuario.Location = new Point(868, 9);
             lblUsuario.Name = "lblUsuario";
             lblUsuario.Size = new Size(78, 21);
             lblUsuario.TabIndex = 5;
             lblUsuario.Text = "Usuario1";
             // 
-            // lblPatente
-            // 
-            lblPatente.AutoSize = true;
-            lblPatente.Location = new Point(759, 60);
-            lblPatente.Name = "lblPatente";
-            lblPatente.Size = new Size(47, 15);
-            lblPatente.TabIndex = 6;
-            lblPatente.Text = "Patente";
-            // 
-            // lblAduana
-            // 
-            lblAduana.AutoSize = true;
-            lblAduana.Location = new Point(812, 59);
-            lblAduana.Name = "lblAduana";
-            lblAduana.Size = new Size(48, 15);
-            lblAduana.TabIndex = 7;
-            lblAduana.Text = "Aduana";
-            // 
-            // lblPedimento
-            // 
-            lblPedimento.AutoSize = true;
-            lblPedimento.Location = new Point(866, 60);
-            lblPedimento.Name = "lblPedimento";
-            lblPedimento.Size = new Size(71, 15);
-            lblPedimento.TabIndex = 8;
-            lblPedimento.Text = "Pedimiento ";
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(964, 496);
-            Controls.Add(lblPedimento);
-            Controls.Add(lblAduana);
-            Controls.Add(lblPatente);
+            ClientSize = new Size(962, 491);
             Controls.Add(lblUsuario);
             Controls.Add(groupBox2);
             Controls.Add(gbxZipContenido);
@@ -336,8 +303,5 @@
         private GroupBox groupBox2;
         private Label label2;
         private Label lblUsuario;
-        private Label lblPatente;
-        private Label lblAduana;
-        private Label lblPedimento;
     }
 }

@@ -328,6 +328,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                         MessageBox.Show("Archivo agregado correctamente al ZIP.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+                        nombresArchivosAgregados.Clear();
+                        
                     }
                 }
                 else
@@ -370,6 +372,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         gestorBD.AgregarRegistro(patente, aduana, pedimento, "Agrego", nombresArchivosAgregados, lblUsuario.Text, zipV);
 
                         MessageBox.Show("Archivo agregado correctamente al ZIP.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        nombresArchivosAgregados.Clear();
                     }
 
                 }
@@ -396,76 +400,67 @@ namespace LOPEZADRI_FILE_MANAGER_2
             {
                 // Ruta del ZIP principal en la carpeta principal
                 string mainZipPath = Path.Combine(folderpath, label2.Text);
-
                 // Ruta del ZIP temporal
                 string tempZipPath = Path.Combine(Path.GetTempPath(), "temp_zip_" + Guid.NewGuid().ToString() + ".zip");
 
-                //try
-                //{
-                    // Copiar el ZIP principal al temporal
-                    File.Copy(mainZipPath, tempZipPath, true);
+                // Copiar el ZIP principal al temporal
+                File.Copy(mainZipPath, tempZipPath, true);
 
                     // Extraer archivos actuales del ZIP principal
-                    List<FileHelper>? currentFiles = FileHelper.LoadPath(tempZipPath);
+                List<FileHelper>? currentFiles = FileHelper.LoadPath(tempZipPath);
 
-                    // Abrir el archivo ZIP temporal
-                    using (ZipArchive archive = ZipFile.Open(tempZipPath, ZipArchiveMode.Update))
+                // Abrir el archivo ZIP temporal
+                using (ZipArchive archive = ZipFile.Open(tempZipPath, ZipArchiveMode.Update))
+                {
+                    // Agregar archivos seleccionados al ZIP temporal
+                    foreach (string filePath in files)
                     {
-                        // Agregar archivos seleccionados al ZIP temporal
-                        foreach (string filePath in files)
+                        string fileName = Path.GetFileName(filePath);
+
+                        // Verificar si el archivo ya existe en el ZIP
+                        if (!currentFiles.Any(file => file.nameFile.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
                         {
-                            string fileName = Path.GetFileName(filePath);
+                            // Crear una nueva entrada en el ZIP y extraer el archivo
+                            ZipArchiveEntry entry = archive.CreateEntry(fileName);
+                            nombresArchivosAgregados.Add(fileName);
 
-                            // Verificar si el archivo ya existe en el ZIP
-                            if (!currentFiles.Any(file => file.nameFile.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
+                            using (Stream entryStream = entry.Open())
+                            using (FileStream fileStream = File.OpenRead(filePath))
                             {
-                                // Crear una nueva entrada en el ZIP y extraer el archivo
-                                ZipArchiveEntry entry = archive.CreateEntry(fileName);
-                                nombresArchivosAgregados.Add(fileName);
-
-                                using (Stream entryStream = entry.Open())
-                                using (FileStream fileStream = File.OpenRead(filePath))
-                                {
-                                    fileStream.CopyTo(entryStream);
-                                }
+                                fileStream.CopyTo(entryStream);
                             }
                         }
-
+                        else
+                        {
+                            MessageBox.Show("Archivo(s) ya existente(s).", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                      
                     }
 
-                    // Sustituir el ZIP principal con el ZIP temporal
-                    File.Copy(tempZipPath, mainZipPath, true);
+                }
 
-                    //MessageBox.Show("Archivo agregado correctamente.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Sustituir el ZIP principal con el ZIP temporal
+                File.Copy(tempZipPath, mainZipPath, true);
 
-                    fileHelp = FileHelper.LoadPath(mainZipPath);
+                fileHelp = FileHelper.LoadPath(mainZipPath);
 
-                    loadExtractedList();
+                loadExtractedList();
 
-                    zipHelper.SearchAndHighlightZipFiles(dgvContenido);
+                zipHelper.SearchAndHighlightZipFiles(dgvContenido);
 
-                    fileHelp2 = FileHelper.LoadPath(nestedZipPath);
+                fileHelp2 = FileHelper.LoadPath(nestedZipPath);
 
-                    zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
-                    elementos = nameFile.Split(' ');
-                    patente = elementos.Length > 0 ? elementos[0] : "No hay elemento";
-                    aduana = elementos.Length > 1 ? elementos[1] : "No hay elemento";
-                    pedimento = elementos.Length > 2 ? elementos[2] : "No hay elemento";
+                zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
+                elementos = nameFile.Split(' ');
+                patente = elementos.Length > 0 ? elementos[0] : "No hay elemento";
+                aduana = elementos.Length > 1 ? elementos[1] : "No hay elemento";
+                pedimento = elementos.Length > 2 ? elementos[2] : "No hay elemento";
 
-                //}
-                //catch (Exception ex)
-                //{
-                //    MessageBox.Show("Error al agregar \n" + ex.Message, "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                //}
-                //finally
-                //{
                 if(File.Exists(tempZipPath))
                 {
                     File.Delete(tempZipPath);
                 }
-                    
-                //}
-
+               
             }
         }
 
@@ -481,65 +476,46 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 // Ruta del ZIP temporal
                 string tempZipPath = Path.Combine(Path.GetTempPath(), "temp_nested_zip_" + Guid.NewGuid().ToString() + ".zip");
 
-                //try
-                //{
-                    // Copiar el ZIP interno al temporal
-                    File.Copy(nestedZipPath, tempZipPath, true);
+                // Copiar el ZIP interno al temporal
+                File.Copy(nestedZipPath, tempZipPath, true);
 
-                    // Extraer archivos actuales del ZIP interno
-                    List<FileHelper>? currentNestedFiles = FileHelper.LoadPath(tempZipPath);
+                // Extraer archivos actuales del ZIP interno
+                List<FileHelper>? currentNestedFiles = FileHelper.LoadPath(tempZipPath);
 
-                    // Abrir el archivo ZIP temporal interno
-                    using (ZipArchive nestedArchive = ZipFile.Open(tempZipPath, ZipArchiveMode.Update))
+                // Abrir el archivo ZIP temporal interno
+                using (ZipArchive nestedArchive = ZipFile.Open(tempZipPath, ZipArchiveMode.Update))
+                {
+                    // Agregar archivos seleccionados al ZIP temporal interno
+                    foreach (string filePath in files)
                     {
-                        // Agregar archivos seleccionados al ZIP temporal interno
-                        foreach (string filePath in files)
-                        {
-                            string fileName = Path.GetFileName(filePath);
+                        string fileName = Path.GetFileName(filePath);
 
-                            // Verificar si el archivo ya existe en el ZIP interno
-                            if (!currentNestedFiles.Any(file => file.nameFile.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
+                        // Verificar si el archivo ya existe en el ZIP interno
+                        if (!currentNestedFiles.Any(file => file.nameFile.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            // Crear una nueva entrada en el ZIP interno y extraer el archivo
+                            ZipArchiveEntry nestedEntry = nestedArchive.CreateEntry(fileName);
+                            nombresArchivosAgregados.Add(fileName);
+                            using (Stream entryStream = nestedEntry.Open())
+                            using (FileStream fileStream = File.OpenRead(filePath))
                             {
-                                // Crear una nueva entrada en el ZIP interno y extraer el archivo
-                                ZipArchiveEntry nestedEntry = nestedArchive.CreateEntry(fileName);
-                                nombresArchivosAgregados.Add(fileName);
-                                using (Stream entryStream = nestedEntry.Open())
-                                using (FileStream fileStream = File.OpenRead(filePath))
-                                {
-                                    fileStream.CopyTo(entryStream);
-                                }
+                                fileStream.CopyTo(entryStream);
                             }
                         }
                     }
-                    // Sustituir el ZIP interno con el ZIP temporal
-                    File.Copy(tempZipPath, nestedZipPath, true);
-                    ReplaceInnerZipInOuterZip();
+                }
+                // Sustituir el ZIP interno con el ZIP temporal
+                File.Copy(tempZipPath, nestedZipPath, true);
+                ReplaceInnerZipInOuterZip();
 
-                    //MessageBox.Show("Archivo agregado correctamente al ZIP interno.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Vuelve a cargar la lista de archivos extraídos
+                fileHelp2 = FileHelper.LoadPath(nestedZipPath);
+                zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
 
-                    // Vuelve a cargar la lista de archivos extraídos
-                    fileHelp2 = FileHelper.LoadPath(nestedZipPath);
-                    zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
-
-                    elementos = nameFile.Split(' ');
-                    patente = elementos.Length > 0 ? elementos[0] : "No hay elemento";
-                    aduana = elementos.Length > 1 ? elementos[1] : "No hay elemento";
-                    pedimento = elementos.Length > 2 ? elementos[2] : "No hay elemento";
-
-
-
-
-                //}
-                //catch (Exception)
-                //{
-                //    MessageBox.Show("Selecciona el segundo archivo ZIP.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //}
-                //finally
-                //{
-                //    // Eliminar el archivo ZIP temporal interno
-                //    File.Delete(tempZipPath);
-
-                //}
+                elementos = nameFile.Split(' ');
+                patente = elementos.Length > 0 ? elementos[0] : "No hay elemento";
+                aduana = elementos.Length > 1 ? elementos[1] : "No hay elemento";
+                pedimento = elementos.Length > 2 ? elementos[2] : "No hay elemento";
 
                 if(File.Exists(tempZipPath))
                 {
@@ -651,8 +627,12 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 {
                     dgvExpedientes.CurrentCell = dgvExpedientes.Rows[rowIndex].Cells[columnIndex];
 
+                   
+                     // Asigna tu icono a la propiedad Image
+
                     ContextMenuStrip menu = new ContextMenuStrip();
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
+                    eliminarFile.Image = Properties.Resources.eliminar;
                     eliminarFile.Name = "Eliminar";
                     eliminarFile.Click += EliminarFileZip_Click;
 
@@ -686,6 +666,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                     ContextMenuStrip menu = new ContextMenuStrip();
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
+                    eliminarFile.Image = Properties.Resources.eliminar;
                     eliminarFile.Name = "Eliminar";
                     eliminarFile.Click += EliminarFileZip1_Click;
 
@@ -719,6 +700,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                     ContextMenuStrip menu = new ContextMenuStrip();
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
+                    eliminarFile.Image = Properties.Resources.eliminar;
                     eliminarFile.Name = "Eliminar";
                     eliminarFile.Click += EliminarFileZip2_Click;
 
@@ -855,8 +837,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 // Eliminar el archivo ZIP temporal
                                 File.Delete(tempZipFilePath);
                             }
-
-
 
                         }
                     }
