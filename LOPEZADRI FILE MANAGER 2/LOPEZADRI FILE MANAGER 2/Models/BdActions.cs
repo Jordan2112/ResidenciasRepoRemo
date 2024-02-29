@@ -54,13 +54,12 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
                         int filasAfectadas = command.ExecuteNonQuery();
                         connection.Close();
 
-
                     }
 
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
-                    
+                    MessageBox.Show("Posible error en BD ",ex.Message);
                 }
                
             }

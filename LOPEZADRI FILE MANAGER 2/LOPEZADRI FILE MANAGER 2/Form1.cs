@@ -80,7 +80,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             txtFiltro.Focus();
 
             txtFiltro.TextChanged += txtFiltro_TextChanged;
-
+            timer1.Start();
         }
         public void loadExtractedList()
         {
@@ -319,7 +319,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         }
 
                         // Agregar archivos al ZIP principal
-                       
+
                         ResaltarUltimaCeldaAgregada(dgvContenido);
 
                         BdActions gestorBD = new BdActions(conn);
@@ -329,7 +329,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         MessageBox.Show("Archivo agregado correctamente al ZIP.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         nombresArchivosAgregados.Clear();
-                        
+
                     }
                 }
                 else
@@ -368,7 +368,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         ResaltarUltimaCeldaAgregada(dgvContenidoZip);
 
                         BdActions gestorBD = new BdActions(conn);
-                        string zipV = patente  +  @" " + aduana + @" " + pedimento + @" " + @"-V";
+                        string zipV = patente + @" " + aduana + @" " + pedimento + @" " + @"-V";
                         gestorBD.AgregarRegistro(patente, aduana, pedimento, "Agrego", nombresArchivosAgregados, lblUsuario.Text, zipV);
 
                         MessageBox.Show("Archivo agregado correctamente al ZIP.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -406,7 +406,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 // Copiar el ZIP principal al temporal
                 File.Copy(mainZipPath, tempZipPath, true);
 
-                    // Extraer archivos actuales del ZIP principal
+                // Extraer archivos actuales del ZIP principal
                 List<FileHelper>? currentFiles = FileHelper.LoadPath(tempZipPath);
 
                 // Abrir el archivo ZIP temporal
@@ -434,7 +434,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         {
                             MessageBox.Show("Archivo(s) ya existente(s).", "A D V E R T E N C I A", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
-                      
+
                     }
 
                 }
@@ -456,11 +456,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 aduana = elementos.Length > 1 ? elementos[1] : "No hay elemento";
                 pedimento = elementos.Length > 2 ? elementos[2] : "No hay elemento";
 
-                if(File.Exists(tempZipPath))
+                if (File.Exists(tempZipPath))
                 {
                     File.Delete(tempZipPath);
                 }
-               
+
             }
         }
 
@@ -517,7 +517,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 aduana = elementos.Length > 1 ? elementos[1] : "No hay elemento";
                 pedimento = elementos.Length > 2 ? elementos[2] : "No hay elemento";
 
-                if(File.Exists(tempZipPath))
+                if (File.Exists(tempZipPath))
                 {
                     File.Delete(tempZipPath);
                 }
@@ -627,8 +627,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 {
                     dgvExpedientes.CurrentCell = dgvExpedientes.Rows[rowIndex].Cells[columnIndex];
 
-                   
-                     // Asigna tu icono a la propiedad Image
+
+                    // Asigna tu icono a la propiedad Image
 
                     ContextMenuStrip menu = new ContextMenuStrip();
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
@@ -929,6 +929,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     dleteZip = dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
                 }
             }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            lblHora.Text = DateTime.Now.ToString("hh:mm:ss tt");
         }
     }
 
