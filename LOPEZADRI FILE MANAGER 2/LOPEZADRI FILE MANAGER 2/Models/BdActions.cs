@@ -18,7 +18,7 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             this.connectionString = connectionString;
         }
 
-        public void AgregarRegistro(string patente, string aduana, string pedimento, string tipoModificacion, List<string> nombresArchivos, string usuario, string zipV)
+        public void AddRegistry(string patente, string aduana, string pedimento, string tipoModificacion, List<string> nombresArchivos, string usuario, string zipV)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {

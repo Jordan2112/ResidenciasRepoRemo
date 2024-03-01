@@ -30,7 +30,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         private string zipsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "ZIPS");
 
-        int bandera;
+        int flag;
 
         private string? lastClickedCellValue = null;
 
@@ -70,11 +70,10 @@ namespace LOPEZADRI_FILE_MANAGER_2
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-
             /* La lista le asignas el resultado del metodo de la clase */
             fileHelp = FileHelper.LoadPath(folderpath);
             //fileHelp = FileHelper.LoadPath(folderPath2);
-            bandera = 1;
+            flag = 1;
 
             loadExtractedList();
             txtFiltro.Focus();
@@ -85,7 +84,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
         public void loadExtractedList()
         {
 
-            if (bandera == 1)
+            if (flag == 1)
             {
                 // Convierte la lista de objetos FileHelper a un DataTable
                 DataTable dataTable = FileHelper.ConvertListToDataTable(fileHelp);
@@ -144,7 +143,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-
         private void dgvExpedientes_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
 
@@ -153,7 +151,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             fileHelp2 = new List<FileHelper>();
 
             // Bandera para decisión en extraer el contenido a un DataTable
-            bandera = 2;
+            flag = 2;
 
             // Verificar si la celda seleccionada es válida
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
@@ -288,8 +286,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
             dgvContenidoZip.DataSource = null;
         }
 
-
-
         private void btnAgregar_Click(object sender, EventArgs e)
         {
 
@@ -320,11 +316,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                         // Agregar archivos al ZIP principal
 
-                        ResaltarUltimaCeldaAgregada(dgvContenido);
+                        HighlightLastCellAdded(dgvContenido);
 
                         BdActions gestorBD = new BdActions(conn);
 
-                        gestorBD.AgregarRegistro(patente, aduana, pedimento, "Agrego", nombresArchivosAgregados, lblUsuario.Text, null);
+                        gestorBD.AddRegistry(patente, aduana, pedimento, "Agrego", nombresArchivosAgregados, lblUsuario.Text, null);
 
                         MessageBox.Show("Archivo agregado correctamente al ZIP.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -365,11 +361,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
                             return;  // Puedes decidir si quieres salir del método o realizar alguna otra acción en caso de excepción.
                         }
 
-                        ResaltarUltimaCeldaAgregada(dgvContenidoZip);
+                        HighlightLastCellAdded(dgvContenidoZip);
 
                         BdActions gestorBD = new BdActions(conn);
                         string zipV = patente + @" " + aduana + @" " + pedimento + @" " + @"-V";
-                        gestorBD.AgregarRegistro(patente, aduana, pedimento, "Agrego", nombresArchivosAgregados, lblUsuario.Text, zipV);
+                        gestorBD.AddRegistry(patente, aduana, pedimento, "Agrego", nombresArchivosAgregados, lblUsuario.Text, zipV);
 
                         MessageBox.Show("Archivo agregado correctamente al ZIP.", "C O R R E C T O", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -599,7 +595,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-        private void ResaltarUltimaCeldaAgregada(DataGridView dataGridView)
+        private void HighlightLastCellAdded(DataGridView dataGridView)
         {
             // Obtener el índice de la última fila en el DataGridView
             int ultimaFilaIndex = dataGridView.Rows.Count - 1;
