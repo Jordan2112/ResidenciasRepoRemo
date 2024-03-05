@@ -1,14 +1,8 @@
 using LOPEZADRI_FILE_MANAGER_2.Models;
-using Microsoft.VisualBasic.FileIO;
-using Microsoft.VisualBasic;
+using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Windows.Forms;
-using System.Reflection.Emit;
-using System.Configuration;
-using System;
-using System.Data.SqlClient;
 
 
 
@@ -42,6 +36,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         string[]? elementos;
 
+        string[] elementos2;
+
         static string conn = ConfigurationManager.ConnectionStrings["LOCAL"].ConnectionString;
 
         List<string> nombresArchivosAgregados = new List<string>();
@@ -53,6 +49,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
         string? aduana;
 
         string? pedimento;
+
+        string cellvalue2;
 
         public Form1()
         {
@@ -762,6 +760,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 dataGridView.Rows.RemoveAt(rowIndex);
 
                                 MessageBox.Show("Archivo eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                BdActions gestorBD = new BdActions(conn);
+
+                                gestorBD.DeleteRegistry(patente, aduana, pedimento, "Elimino", cellvalue2, lblUsuario.Text, null);
+
                             }
                             catch (Exception ex)
                             {
@@ -800,6 +803,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                     if (entryToRemove != null)
                                     {
                                         entryToRemove.Delete();
+
 
                                     }
                                     else
@@ -861,6 +865,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                     if (entryToRemove != null)
                                     {
                                         entryToRemove.Delete();
+
+
 
                                     }
                                     else
@@ -927,9 +933,43 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        //private void timer1_Tick(object sender, EventArgs e)
+        //{
+        //    lblHora.Text = DateTime.Now.ToString("hh:mm:ss tt");
+        //}
+
+        private void dgvExpedientes_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            lblHora.Text = DateTime.Now.ToString("hh:mm:ss tt");
+            if (e.Button == MouseButtons.Right)
+            {
+                // Verificar si la celda seleccionada es válida
+                if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+                {
+                    // Obtener el contenido de la celda seleccionada
+                    cellvalue2 = dgvExpedientes.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+
+                    // Dividir la cadena por espacios
+                    elementos2 = cellvalue2.Split(' ');
+
+                    // Verificar si hay suficientes elementos en la cadena
+                    if (elementos2.Length >= 3)
+                    {
+                        // Obtener los valores deseados
+                        patente = elementos2[0];
+                        aduana = elementos2[1];
+
+                        // Eliminar ".zip" del último elemento y obtener el pedimento
+                        pedimento = elementos2[2].Replace(".zip", "");
+                    }
+                    else
+                    {
+                        // No hay suficientes elementos en la cadena
+                        patente = "No hay elemento";
+                        aduana = "No hay elemento";
+                        pedimento = "No hay elemento";
+                    }
+                }
+            }
         }
     }
 

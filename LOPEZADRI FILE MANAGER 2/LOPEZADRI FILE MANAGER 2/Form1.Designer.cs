@@ -105,6 +105,7 @@
             dgvExpedientes.Size = new Size(232, 359);
             dgvExpedientes.TabIndex = 0;
             dgvExpedientes.CellContentDoubleClick += dgvExpedientes_CellContentDoubleClick;
+            dgvExpedientes.CellMouseClick += dgvExpedientes_CellMouseClick;
             dgvExpedientes.MouseDown += dgvExpedientes_MouseDown;
             // 
             // gbxContenido
@@ -271,7 +272,7 @@
             // 
             // timer1
             // 
-            timer1.Tick += timer1_Tick;
+            //timer1.Tick += timer1_Tick;
             // 
             // Form1
             // 
