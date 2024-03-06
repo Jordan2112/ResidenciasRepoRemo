@@ -1,5 +1,7 @@
 using Microsoft.VisualBasic.ApplicationServices;
 using System.Net;
+using System.Windows.Forms;
+
 
 namespace descargarprueba
 {
@@ -8,53 +10,42 @@ namespace descargarprueba
         public Form1()
         {
             InitializeComponent();
+
+
+
+            // Llenar el DataGridView con las rutas de archivos PDF (esto puede variar según tu implementación)
+            // Aquí estoy usando un ejemplo simple con rutas de archivos estáticas.
+            dataGridView1.Rows.Add(@"C:\Users\Lopezadri\Desktop\Certificacion\Docs\1-02 18100158 Carta de Presentacion.pdf");
+
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            string rutaServidor = @"c:\users\lopezadri\desktop\expedientes\";
 
-            if (string.IsNullOrWhiteSpace(rutaServidor))
-            {
-                MessageBox.Show("Por favor, ingresa una ruta de servidor válida.");
-                return;
-            }
-
-            DescargarArchivosDesdeServidor(rutaServidor);
         }
 
-        private void DescargarArchivosDesdeServidor(string rutaServidor)
+
+
+        private void Form1_Load(object sender, EventArgs e)
         {
-            using (WebClient cliente = new WebClient())
-            {
-                try
-                {
-                    string[] archivosEnServidor = Directory.GetFiles(rutaServidor);
 
-                    using (FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog())
-                    {
-                        folderBrowserDialog.Description = "Seleccione la carpeta de destino";
-                        if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-                        {
-                            string carpetaDestinoLocal = folderBrowserDialog.SelectedPath;
+        }
 
-                            foreach (string archivoEnServidor in archivosEnServidor)
-                            {
-                                string nombreArchivo = Path.GetFileName(archivoEnServidor);
-                                string rutaDestinoLocal = Path.Combine(carpetaDestinoLocal, nombreArchivo);
+        private void dataGridView1_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
 
-                                cliente.DownloadFile(Path.Combine(rutaServidor, nombreArchivo), rutaDestinoLocal);
-                            }
+        }
 
-                            MessageBox.Show("Descarga completada correctamente.");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error al descargar archivos: {ex.Message}");
-                }
-            }
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            string rutaArchivo = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+
+            // Puedes abrir la vista previa aquí o llamar a un método que maneje la vista previa
+            MostrarVistaPreviaPDF(rutaArchivo);
+        }
+        private void MostrarVistaPreviaPDF(string rutaArchivo)
+        {
+            
         }
     }
 }

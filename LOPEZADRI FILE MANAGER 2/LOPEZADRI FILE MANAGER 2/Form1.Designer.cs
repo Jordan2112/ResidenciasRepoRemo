@@ -114,7 +114,7 @@
             gbxContenido.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             gbxContenido.Location = new Point(262, 105);
             gbxContenido.Name = "gbxContenido";
-            gbxContenido.Size = new Size(297, 403);
+            gbxContenido.Size = new Size(339, 403);
             gbxContenido.TabIndex = 2;
             gbxContenido.TabStop = false;
             gbxContenido.Text = "CONTENIDO PRINCIPAL";
@@ -134,7 +134,7 @@
             dgvContenido.ReadOnly = true;
             dgvContenido.RowHeadersVisible = false;
             dgvContenido.RowTemplate.Height = 25;
-            dgvContenido.Size = new Size(285, 379);
+            dgvContenido.Size = new Size(327, 379);
             dgvContenido.TabIndex = 0;
             dgvContenido.CellClick += dgvContenido_CellClick;
             dgvContenido.CellContentClick += dgvContenido_CellContentClick;
@@ -145,9 +145,9 @@
             // 
             gbxZipContenido.Controls.Add(dgvContenidoZip);
             gbxZipContenido.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
-            gbxZipContenido.Location = new Point(565, 85);
+            gbxZipContenido.Location = new Point(607, 85);
             gbxZipContenido.Name = "gbxZipContenido";
-            gbxZipContenido.Size = new Size(461, 423);
+            gbxZipContenido.Size = new Size(510, 423);
             gbxZipContenido.TabIndex = 3;
             gbxZipContenido.TabStop = false;
             gbxZipContenido.Text = "CONTENIDO SECUNDARIO";
@@ -167,7 +167,7 @@
             dgvContenidoZip.ReadOnly = true;
             dgvContenidoZip.RowHeadersVisible = false;
             dgvContenidoZip.RowTemplate.Height = 25;
-            dgvContenidoZip.Size = new Size(449, 397);
+            dgvContenidoZip.Size = new Size(497, 397);
             dgvContenidoZip.TabIndex = 0;
             dgvContenidoZip.CellMouseClick += dgvContenidoZip_CellMouseClick;
             dgvContenidoZip.MouseDown += dgvContenidoZip_MouseDown;
@@ -189,7 +189,7 @@
             groupBox1.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point);
             groupBox1.Location = new Point(262, 12);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(297, 87);
+            groupBox1.Size = new Size(339, 87);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "Agregar";
@@ -197,7 +197,7 @@
             // rbtzipContenido
             // 
             rbtzipContenido.AutoSize = true;
-            rbtzipContenido.Location = new Point(26, 50);
+            rbtzipContenido.Location = new Point(32, 50);
             rbtzipContenido.Name = "rbtzipContenido";
             rbtzipContenido.Size = new Size(118, 21);
             rbtzipContenido.TabIndex = 5;
@@ -208,7 +208,7 @@
             // 
             rbtzipPrincipal.AutoSize = true;
             rbtzipPrincipal.Checked = true;
-            rbtzipPrincipal.Location = new Point(26, 24);
+            rbtzipPrincipal.Location = new Point(40, 23);
             rbtzipPrincipal.Name = "rbtzipPrincipal";
             rbtzipPrincipal.Size = new Size(104, 21);
             rbtzipPrincipal.TabIndex = 4;
@@ -218,9 +218,9 @@
             // 
             // btnAgregar
             // 
-            btnAgregar.Location = new Point(167, 23);
+            btnAgregar.Location = new Point(182, 23);
             btnAgregar.Name = "btnAgregar";
-            btnAgregar.Size = new Size(104, 42);
+            btnAgregar.Size = new Size(130, 42);
             btnAgregar.TabIndex = 3;
             btnAgregar.Text = "Agregar";
             btnAgregar.UseVisualStyleBackColor = true;
@@ -270,15 +270,11 @@
             lblHora.TabIndex = 6;
             lblHora.Text = "label4";
             // 
-            // timer1
-            // 
-            //timer1.Tick += timer1_Tick;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1038, 515);
+            ClientSize = new Size(1122, 518);
             Controls.Add(lblHora);
             Controls.Add(lblUsuario);
             Controls.Add(groupBox2);

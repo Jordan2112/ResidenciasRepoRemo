@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Windows.Forms;
 
 
 
@@ -143,6 +144,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         private void dgvExpedientes_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+            dgvContenido.ColumnHeadersVisible = true;
+            dgvContenidoZip.ColumnHeadersVisible = true;
 
             // Lista nueva para almacenar lo que está dentro del ZIP
             fileHelp = new List<FileHelper>();
@@ -625,6 +628,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     // Asigna tu icono a la propiedad Image
 
                     ContextMenuStrip menu = new ContextMenuStrip();
+
+                    ToolStripItem descargarFile = menu.Items.Add("Descargar");
+                    descargarFile.Image = Properties.Resources.descargar; // Puedes asignar una imagen apropiada
+                    descargarFile.Name = "Descargar";
+
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
                     eliminarFile.Image = Properties.Resources.eliminar;
                     eliminarFile.Name = "Eliminar";
@@ -637,7 +645,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     int altoCelda = coordenada.Location.Y;  // Alto de la localización de la celda
 
                     // Y para mostrar el menú lo haces de esta forma:
-                    int X = anchoCelda + dgvExpedientes.Location.X + 145;
+                    int X = anchoCelda + dgvExpedientes.Location.X + 150;
                     int Y = altoCelda;
 
                     menu.Show(dgvExpedientes, new Point(X, Y));
@@ -659,6 +667,10 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     dgvContenido.CurrentCell = dgvContenido.Rows[rowIndex].Cells[columnIndex];
 
                     ContextMenuStrip menu = new ContextMenuStrip();
+                    ToolStripItem descargarFile = menu.Items.Add("Descargar");
+                    descargarFile.Image = Properties.Resources.descargar; // Puedes asignar una imagen apropiada
+                    descargarFile.Name = "Descargar";
+
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
                     eliminarFile.Image = Properties.Resources.eliminar;
                     eliminarFile.Name = "Eliminar";
@@ -671,7 +683,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     int altoCelda = coordenada.Location.Y;  // Alto de la localización de la celda
 
                     // Y para mostrar el menú lo haces de esta forma:
-                    int X = anchoCelda + dgvContenido.Location.X + 145;
+                    int X = anchoCelda + dgvContenido.Location.X + 180;
                     int Y = altoCelda;
 
                     menu.Show(dgvContenido, new Point(X, Y));
@@ -693,6 +705,10 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     dgvContenidoZip.CurrentCell = dgvContenidoZip.Rows[rowIndex].Cells[columnIndex];
 
                     ContextMenuStrip menu = new ContextMenuStrip();
+                    ToolStripItem descargarFile = menu.Items.Add("Descargar");
+                    descargarFile.Image = Properties.Resources.descargar; // Puedes asignar una imagen apropiada
+                    descargarFile.Name = "Descargar";
+                    
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
                     eliminarFile.Image = Properties.Resources.eliminar;
                     eliminarFile.Name = "Eliminar";
@@ -705,7 +721,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     int altoCelda = coordenada.Location.Y;  // Alto de la localización de la celda
 
                     // Y para mostrar el menú lo haces de esta forma:
-                    int X = anchoCelda + dgvContenidoZip.Location.X + 145;
+                    int X = anchoCelda + dgvContenidoZip.Location.X + 280;
                     int Y = altoCelda;
 
                     menu.Show(dgvContenidoZip, new Point(X, Y));
@@ -725,7 +741,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
             // Agrega un cuadro de diálogo para ingresar la contraseña
 
             DeleteSelectedFile(dgvContenido);
-
 
         }
 
@@ -760,6 +775,27 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 dataGridView.Rows.RemoveAt(rowIndex);
 
                                 MessageBox.Show("Archivo eliminado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                fileHelp.Clear(); // Limpia la lista
+                                fileHelp2.Clear(); // Limpia la segunda lista
+
+                                // Desvincula y limpia las columnas del primer DataGridView
+                                dgvContenido.DataSource = null;
+                                dgvContenido.Columns.Clear();
+
+                                // Desvincula y limpia las columnas del segundo DataGridView
+                                dgvContenidoZip.DataSource = null;
+                                dgvContenidoZip.Columns.Clear();
+
+                                // Vuelve a vincular los DataGridView a las listas limpias
+                                dgvContenido.DataSource = fileHelp;
+                                dgvContenidoZip.DataSource = fileHelp2;
+
+                                // Borra visualmente los nombres de las columnas
+                                dgvContenido.ColumnHeadersVisible = false;
+                                dgvContenidoZip.ColumnHeadersVisible = false;
+
+
 
                                 BdActions gestorBD = new BdActions(conn);
 
@@ -804,6 +840,28 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                     {
                                         entryToRemove.Delete();
 
+                                        elementos2 = label2.Text.Split(' ');
+
+                                        if (elementos2.Length >= 3)
+                                        {
+                                            // Obtener los valores deseados
+                                            patente = elementos2[0];
+                                            aduana = elementos2[1];
+
+                                            // Eliminar ".zip" y/o "-V" del último elemento y obtener el pedimento
+                                            pedimento = elementos2[2].Replace(".zip", "").Replace("-V", "");
+                                        }
+                                        else
+                                        {
+                                            // No hay suficientes elementos en la cadena
+                                            patente = "No hay elemento";
+                                            aduana = "No hay elemento";
+                                            pedimento = "No hay elemento";
+                                        }
+
+                                        BdActions gestorBD = new BdActions(conn);
+
+                                        gestorBD.DeleteRegistry(patente, aduana, pedimento, "Elimino", rutaEliminar, lblUsuario.Text, null);
 
                                     }
                                     else
@@ -866,7 +924,31 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                     {
                                         entryToRemove.Delete();
 
+                                        elementos2 = label2.Text.Split(' ');
 
+                                        // Verificar si hay suficientes elementos en la cadena
+                                        if (elementos2.Length >= 3)
+                                        {
+                                            // Obtener los valores deseados
+                                            patente = elementos2[0];
+                                            aduana = elementos2[1];
+
+                                            // Eliminar "-V.zip" del último elemento y obtener el pedimento
+                                            pedimento = elementos2[2].Replace("-V.zip", "");
+                                        }
+                                        else
+                                        {
+                                            // No hay suficientes elementos en la cadena
+                                            patente = "No hay elemento";
+                                            aduana = "No hay elemento";
+                                            pedimento = "No hay elemento";
+                                        }
+
+                                        string zipV = patente + @" " + aduana + @" " + pedimento + @" " + @"-V";
+
+                                        BdActions gestorBD = new BdActions(conn);
+
+                                        gestorBD.DeleteRegistry(patente, aduana, pedimento, "Elimino", rutaEliminar, lblUsuario.Text, zipV);
 
                                     }
                                     else
@@ -883,6 +965,9 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                                 loadExtractedList();
                                 Debug.WriteLine(nestedZipPath);
+
+                                zipHelper.SearchAndHighlightZipFiles(dgvContenido);
+
                                 fileHelp2 = FileHelper.LoadPath(nestedZipPath);
 
                                 zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
@@ -929,6 +1014,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 {
                     // Obtener el contenido de la celda seleccionada
                     dleteZip = dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+
                 }
             }
         }
