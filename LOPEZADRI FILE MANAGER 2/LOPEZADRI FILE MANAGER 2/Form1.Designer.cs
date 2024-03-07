@@ -197,7 +197,7 @@
             // rbtzipContenido
             // 
             rbtzipContenido.AutoSize = true;
-            rbtzipContenido.Location = new Point(32, 50);
+            rbtzipContenido.Location = new Point(40, 50);
             rbtzipContenido.Name = "rbtzipContenido";
             rbtzipContenido.Size = new Size(118, 21);
             rbtzipContenido.TabIndex = 5;

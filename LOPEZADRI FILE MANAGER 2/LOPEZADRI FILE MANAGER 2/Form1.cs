@@ -3,7 +3,6 @@ using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Windows.Forms;
 
 
 
@@ -141,6 +140,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
             }
         }
+        string? rutaDirecta;
 
         private void dgvExpedientes_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -159,7 +159,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             {
                 // Obtener el contenido de la celda seleccionada
                 cellValue = (string)dgvExpedientes.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-
+                rutaDirecta = dgvExpedientes.Rows[e.RowIndex].Cells[3].Value.ToString();
                 label2.Text = cellValue;
 
                 // Realizar la acción deseada solo si el contenido de la celda no es nulo
@@ -576,19 +576,19 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
             }
         }
-
+        string? cellValueD;
         private void dgvContenido_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             // Verificar si la celda seleccionada es válida
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
                 // Obtener el contenido de la celda seleccionada
-                string? cellValue = dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
+                cellValueD = dgvContenido.Rows[e.RowIndex].Cells[e.ColumnIndex].Value?.ToString();
 
                 // Validar si el contenido de la celda es un archivo ZIP
-                if (!string.IsNullOrEmpty(cellValue) && cellValue.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(cellValueD) && cellValueD.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
                 {
-                    label2.Text = cellValue;
+                    label2.Text = cellValueD;
                     label2.BackColor = Color.GreenYellow;
 
                 }
@@ -632,6 +632,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     ToolStripItem descargarFile = menu.Items.Add("Descargar");
                     descargarFile.Image = Properties.Resources.descargar; // Puedes asignar una imagen apropiada
                     descargarFile.Name = "Descargar";
+                    descargarFile.Click += DescargarFile_Click;
 
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
                     eliminarFile.Image = Properties.Resources.eliminar;
@@ -670,6 +671,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     ToolStripItem descargarFile = menu.Items.Add("Descargar");
                     descargarFile.Image = Properties.Resources.descargar; // Puedes asignar una imagen apropiada
                     descargarFile.Name = "Descargar";
+                    descargarFile.Click += DescargarFile2_Click;
+
 
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
                     eliminarFile.Image = Properties.Resources.eliminar;
@@ -708,7 +711,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     ToolStripItem descargarFile = menu.Items.Add("Descargar");
                     descargarFile.Image = Properties.Resources.descargar; // Puedes asignar una imagen apropiada
                     descargarFile.Name = "Descargar";
-                    
+                    descargarFile.Click += DescargarFile3_Click;
+
                     ToolStripItem eliminarFile = menu.Items.Add("Eliminar");
                     eliminarFile.Image = Properties.Resources.eliminar;
                     eliminarFile.Name = "Eliminar";
@@ -729,11 +733,24 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-        private void EliminarFileZip_Click(object sender, EventArgs e)
+        private void DescargarFile_Click(object sender, EventArgs e)
         {
 
-            DeleteSelectedFile(dgvExpedientes);
+            DownloadZip();
+        }
 
+        private void DescargarFile2_Click(object sender, EventArgs e)
+        {
+            DownloadZip2(rutaDirecta, dleteZip);
+        }
+        private void DescargarFile3_Click(object sender, EventArgs e)
+        {
+            DownloadZip3(rutaDirecta, cellValueD, dleteZip);
+        }
+
+        private void EliminarFileZip_Click(object sender, EventArgs e)
+        {
+            DeleteSelectedFile(dgvExpedientes);
         }
 
         private void EliminarFileZip1_Click(object sender, EventArgs e)
@@ -751,6 +768,161 @@ namespace LOPEZADRI_FILE_MANAGER_2
             DeleteSelectedFile(dgvContenidoZip);
 
         }
+
+        private void DownloadZip()
+        {
+            DataGridViewCell selectedCell = dgvExpedientes.CurrentCell;
+
+            // Asegúrate de que hay una celda seleccionada
+            if (selectedCell != null)
+            {
+                // Obtiene la ruta del archivo ZIP desde la columna 3 de la fila seleccionada
+                string? archivoZIP = dgvExpedientes.Rows[selectedCell.RowIndex].Cells[3].Value.ToString(); // Suponiendo que la columna 3 tiene el índice 2
+
+                // Verifica si el archivo existe
+                if (File.Exists(archivoZIP))
+                {
+                    // Puedes realizar otras validaciones del archivo según tus necesidades antes de descargarlo
+
+                    // Pide al usuario la ubicación para guardar el archivo descargado
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.Filter = "Archivos ZIP (*.zip)|*.zip";
+                    saveFileDialog.FileName = Path.GetFileName(archivoZIP);
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        try
+                        {
+                            // Copia el archivo ZIP a la ubicación seleccionada por el usuario
+                            File.Copy(archivoZIP, saveFileDialog.FileName, true);
+                            MessageBox.Show("Descarga completada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error al descargar el archivo: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("El archivo seleccionado no existe.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void DownloadZip2(string rutaArchivoZip, string nombreArchivoDeseado)
+        {
+            string directorioTemporal = Path.Combine(Path.GetTempPath(), "ArchivosTemporales");
+
+            try
+            {
+                // Crea el directorio temporal si no existe
+                Directory.CreateDirectory(directorioTemporal);
+
+                // Descomprime el archivo .zip en el directorio temporal
+                ZipFile.ExtractToDirectory(rutaArchivoZip, directorioTemporal);
+
+                // Ruta completa al archivo deseado dentro del directorio temporal
+                string rutaArchivoDeseado = Path.Combine(directorioTemporal, nombreArchivoDeseado);
+
+                // Verifica si el archivo deseado existe
+                if (File.Exists(rutaArchivoDeseado))
+                {
+                    // Pide al usuario la ubicación para guardar el archivo descargado
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.Filter = "Todos los archivos (*.*)|*.*";
+                    saveFileDialog.FileName = nombreArchivoDeseado;
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // Copia el archivo deseado a la ubicación seleccionada por el usuario
+                        File.Copy(rutaArchivoDeseado, saveFileDialog.FileName, true);
+                        MessageBox.Show("Descarga completada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("El archivo deseado no se encontró dentro del archivo .zip.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al descargar el archivo desde el archivo .zip: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Elimina el directorio temporal y su contenido
+                Directory.Delete(directorioTemporal, true);
+            }
+
+        }
+        private void DownloadZip3(string rutaArchivoZipExterno, string nombreArchivoZipInterno, string nombreArchivoDeseado)
+        {
+            if(nombreArchivoZipInterno.EndsWith("-V.zip") || nombreArchivoZipInterno == null)
+            {
+                string directorioTemporalExterno = Path.Combine(Path.GetTempPath(), "ArchivosTemporalesExterno");
+                string directorioTemporalInterno = Path.Combine(Path.GetTempPath(), "ArchivosTemporalesInterno");
+                try
+                {
+
+                    // Crea el directorio temporal si no existe
+                    Directory.CreateDirectory(directorioTemporalExterno);
+
+                    // Descomprime el archivo .zip externo en el directorio temporal externo
+                    ZipFile.ExtractToDirectory(rutaArchivoZipExterno, directorioTemporalExterno);
+
+                    // Ruta completa al archivo .zip interno dentro del directorio temporal externo
+                    string rutaArchivoZipInterno = Path.Combine(directorioTemporalExterno, nombreArchivoZipInterno);
+
+                    // Crea el directorio temporal interno si no existe
+                    Directory.CreateDirectory(directorioTemporalInterno);
+
+                    // Descomprime el archivo .zip interno en el directorio temporal interno
+                    ZipFile.ExtractToDirectory(rutaArchivoZipInterno, directorioTemporalInterno);
+
+                    // Ruta completa al archivo deseado dentro del directorio temporal interno
+                    string rutaArchivoDeseado = Path.Combine(directorioTemporalInterno, nombreArchivoDeseado);
+
+                    // Verifica si el archivo deseado existe
+                    if (File.Exists(rutaArchivoDeseado))
+                    {
+                        // Pide al usuario la ubicación para guardar el archivo descargado
+                        SaveFileDialog saveFileDialog = new SaveFileDialog();
+                        saveFileDialog.Filter = "Todos los archivos (*.*)|*.*";
+                        saveFileDialog.FileName = nombreArchivoDeseado;
+
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            // Copia el archivo deseado a la ubicación seleccionada por el usuario
+                            File.Copy(rutaArchivoDeseado, saveFileDialog.FileName, true);
+                            MessageBox.Show("Descarga completada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("El archivo deseado no se encontró dentro del archivo .zip interno.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al descargar el archivo desde el archivo .zip externo: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    // Elimina los directorios temporales y su contenido
+                    Directory.Delete(directorioTemporalExterno, true);
+                    Directory.Delete(directorioTemporalInterno, true);
+                }
+
+            }
+            else
+            {
+                MessageBox.Show($"Selecciona el segundo archivo zip", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+           
+        }
+
+
 
         private void DeleteSelectedFile(DataGridView dataGridView)
         {
