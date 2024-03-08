@@ -576,7 +576,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
             }
         }
-        string? cellValueD;
+        string cellValueD;
         private void dgvContenido_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             // Verificar si la celda seleccionada es válida
@@ -856,12 +856,14 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
 
         }
-        private void DownloadZip3(string rutaArchivoZipExterno, string nombreArchivoZipInterno, string nombreArchivoDeseado)
+        private void DownloadZip3(string rutaArchivoZipExterno, string? nombreArchivoZipInterno, string nombreArchivoDeseado)
         {
-            if(nombreArchivoZipInterno.EndsWith("-V.zip") || nombreArchivoZipInterno == null)
+            if (nombreArchivoZipInterno != null && nombreArchivoZipInterno.EndsWith("-V.zip"))
             {
                 string directorioTemporalExterno = Path.Combine(Path.GetTempPath(), "ArchivosTemporalesExterno");
+
                 string directorioTemporalInterno = Path.Combine(Path.GetTempPath(), "ArchivosTemporalesInterno");
+
                 try
                 {
 
@@ -919,7 +921,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             {
                 MessageBox.Show($"Selecciona el segundo archivo zip", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-           
+
         }
 
 
@@ -1191,10 +1193,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-        //private void timer1_Tick(object sender, EventArgs e)
-        //{
-        //    lblHora.Text = DateTime.Now.ToString("hh:mm:ss tt");
-        //}
+       
 
         private void dgvExpedientes_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -1228,6 +1227,11 @@ namespace LOPEZADRI_FILE_MANAGER_2
                     }
                 }
             }
+        }
+
+        private void timer1_Tick_1(object sender, EventArgs e)
+        {
+            lblHora.Text = DateTime.Now.ToString("hh:mm:ss tt");
         }
     }
 
