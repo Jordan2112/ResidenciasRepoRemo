@@ -11,11 +11,6 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
         public DateTime creationFile { get; set; }
         public string? filePath { get; set; }
 
-        public FileHelper()
-        {
-            nameFile = "";
-        }
-
         /*Metodo el cual carga los archivos de un directorio en especifico con base a una ruta 
         proporcionado en la clase de la forma*/
         public static List<FileHelper>? LoadPath(string folderPath)

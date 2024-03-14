@@ -1,8 +1,10 @@
 using LOPEZADRI_FILE_MANAGER_2.Models;
 using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Windows.Forms;
 
 
 
@@ -19,10 +21,22 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         private ZipHelper zipHelper;
 
-        /*Ruta de donde provienen los archivos*/
-        string folderpath = @"c:\users\lopezadri\desktop\expedientes\";
+        public string zipsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "ZIPS");
 
-        private string zipsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "ZIPS");
+        public static string carpetaConsultas = Path.Combine(Environment.CurrentDirectory, "Consultas");
+        /*Ruta de donde provienen los archivos*/
+        //string folderpath = @"c:\users\lopezadri\desktop\expedientes\";
+        string folderpath = carpetaConsultas;
+
+        List<string> rutas = new List<string>
+        {
+            //@"F:\ARCHIVO DIGITAL\FACTURADOS\PATENTE 1684 2023",
+            //@"F:\ARCHIVO DIGITAL\FACTURADOS\PATENTE 1684 2024",
+            @"F:\ARCHIVO DIGITAL\FACTURADOS\PRUEBA 1684 2023",
+            @"F:\ARCHIVO DIGITAL\FACTURADOS\PRUEBA 1684 2024"
+
+
+        };
 
         int flag;
 
@@ -40,6 +54,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
         static string conn = ConfigurationManager.ConnectionStrings["LOCAL"].ConnectionString;
 
+        static string conn2 = ConfigurationManager.ConnectionStrings["CSAAIWIN"].ConnectionString;
+
         List<string> nombresArchivosAgregados = new List<string>();
 
         string? dleteZip = "";
@@ -51,6 +67,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
         string? pedimento;
 
         string cellvalue2;
+
+        private bool datosCargados = false;
 
         public Form1()
         {
@@ -69,16 +87,20 @@ namespace LOPEZADRI_FILE_MANAGER_2
         private void Form1_Load(object sender, EventArgs e)
         {
             /* La lista le asignas el resultado del metodo de la clase */
-            fileHelp = FileHelper.LoadPath(folderpath);
-            //fileHelp = FileHelper.LoadPath(folderPath2);
-            flag = 1;
+            //fileHelp = FileHelper.LoadPath(folderpath);
+            ////fileHelp = FileHelper.LoadPath(folderPath2);
+            //flag = 1;
 
-            loadExtractedList();
+            //loadExtractedList();
+
+            MostrarOcultarControles();
+
             txtFiltro.Focus();
 
             txtFiltro.TextChanged += txtFiltro_TextChanged;
             timer1.Start();
         }
+
         public void loadExtractedList()
         {
 
@@ -142,6 +164,8 @@ namespace LOPEZADRI_FILE_MANAGER_2
         }
         string? rutaDirecta;
 
+        string rutaGuadar;
+
         private void dgvExpedientes_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             dgvContenido.ColumnHeadersVisible = true;
@@ -161,6 +185,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                 cellValue = (string)dgvExpedientes.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
                 rutaDirecta = dgvExpedientes.Rows[e.RowIndex].Cells[3].Value.ToString();
                 label2.Text = cellValue;
+               
 
                 // Realizar la acción deseada solo si el contenido de la celda no es nulo
                 if (cellValue != null)
@@ -201,7 +226,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                     // Ruta del zip que está en el programa
                                     nestedZipPath = Path.Combine(zipsFolder, firstZipEntry.FullName);
                                     // Ruta del zip principal
-                                    string path = folderpath + cellValue;
+                                    string path = folderpath + @"\" + cellValue;
 
                                     label2.BackColor = Color.Yellow;
                                     fileHelp = FileHelper.LoadPath(path);
@@ -224,7 +249,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
                         else
                         {
                             // La carpeta ya existe, mostrar los archivos nuevamente
-                            fileHelp = FileHelper.LoadPath(folderpath + cellValue);
+                            fileHelp = FileHelper.LoadPath(folderpath + @"\" + cellValue);
                             loadExtractedList();
                             zipHelper.SearchAndHighlightZipFiles(dgvContenido);
 
@@ -1193,8 +1218,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-       
-
         private void dgvExpedientes_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -1229,10 +1252,333 @@ namespace LOPEZADRI_FILE_MANAGER_2
             }
         }
 
-        private void timer1_Tick_1(object sender, EventArgs e)
+        //private void timer1_Tick_1(object sender, EventArgs e)
+        //{
+        //    lblHora.Text = DateTime.Now.ToString("hh:mm:ss tt");
+        //}
+
+        public string BuscarArchivoEnRutas(string nombreArchivo, List<string> rutas)
         {
-            lblHora.Text = DateTime.Now.ToString("hh:mm:ss tt");
+            // Iterar sobre cada ruta en la lista de rutas
+            foreach (string ruta in rutas)
+            {
+                // Combinar la ruta actual con el nombre del archivo para obtener la ruta completa del archivo
+                string rutaCompleta = Path.Combine(ruta, nombreArchivo);
+
+                // Verificar si el archivo existe en la ruta completa
+                if (File.Exists(rutaCompleta))
+                {
+                    // Si el archivo existe, devolver la ruta completa del archivo encontrado
+                    return rutaCompleta;
+                }
+            }
+
+            // Si el archivo no se encuentra en ninguna de las rutas, lanzar una excepción
+            throw new FileNotFoundException($"El archivo '{nombreArchivo}' no se encontró en las rutas especificadas.");
         }
+
+
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            BdActions bd = new BdActions(conn2);
+
+            if (rbtPedimento.Checked)
+            {
+                string pedimento = txtPedimento.Text;
+                string patente = cmbPatente.SelectedItem.ToString();
+                string aduana = cmbAduana.SelectedItem.ToString();
+
+                // Llamar al método archivoQuery para obtener el nombre del archivo
+                List<string> nombresArchivos = bd.pedimentoBusqueda(patente, aduana, pedimento);
+
+                // Buscar los archivos en las rutas especificadas
+                try
+                {
+                    foreach (string nombreArchivo in nombresArchivos)
+                    {
+                        string rutaEncontrada = BuscarArchivoEnRutas(nombreArchivo, rutas);
+                        // Aquí puedes hacer lo que necesites con la ruta del archivo encontrada
+                        Debug.WriteLine($"El archivo se encontró en la siguiente ruta: {rutaEncontrada}");
+
+                        // Construir la nueva ruta donde copiaremos el archivo
+                        string nuevaRutaArchivo = Path.Combine(carpetaConsultas, nombreArchivo);
+
+                        // Verificar si el archivo ya existe en la carpeta de consultas
+                        if (!File.Exists(nuevaRutaArchivo))
+                        {
+                            try
+                            {
+                                // Verificar si el directorio "Consultas" no existe y crearlo si es necesario
+                                if (!Directory.Exists(carpetaConsultas))
+                                {
+                                    Directory.CreateDirectory(carpetaConsultas);
+                                }
+
+                                // Copiar el archivo a la nueva ubicación
+                                File.Copy(rutaEncontrada, nuevaRutaArchivo);
+
+                                Debug.WriteLine($"Archivo copiado a la nueva ubicación: {nuevaRutaArchivo}");
+
+                                fileHelp = FileHelper.LoadPath(folderpath);
+                                //fileHelp = FileHelper.LoadPath(folderPath2);
+                                flag = 1;
+
+                                loadExtractedList();
+                            }
+                            catch (Exception ex)
+                            {
+                                // Manejar posibles excepciones al crear el directorio o copiar el archivo
+                                MessageBox.Show($"Error al copiar el archivo: {ex.Message}");
+                            }
+                        }
+                        else
+                        {
+                            Debug.WriteLine("El archivo ya existe en la carpeta de consultas.");
+
+                            fileHelp = FileHelper.LoadPath(folderpath);
+                            //fileHelp = FileHelper.LoadPath(folderPath2);
+                            flag = 1;
+
+                            loadExtractedList();
+                        }
+                    }
+                }
+                catch (FileNotFoundException ex)
+                {
+                    Debug.WriteLine("No se encontró el archivo", ex);
+                }
+            }
+
+            if (rbtFecha.Checked)
+            {
+                DateTime fechaDe = dtpDe.Value.Date;
+                DateTime fechaHasta = dtpHasta.Value.Date;
+
+                // Establecer hora, minutos y segundos a cero para fechaDe
+                DateTime fechaNuevaDe = new DateTime(fechaDe.Year, fechaDe.Month, fechaDe.Day, 0, 0, 0);
+
+                // Establecer hora, minutos y segundos al final del día (23:59:59) para fechaHasta
+                DateTime fechaNuevaHasta = new DateTime(fechaHasta.Year, fechaHasta.Month, fechaHasta.Day, 23, 59, 59);
+
+                Debug.WriteLine(fechaNuevaDe.ToString("MM/dd/yyyy HH:mm:ss"));
+                Debug.WriteLine(fechaNuevaHasta.ToString("MM/dd/yyyy HH:mm:ss"));
+
+                List<string> nombresArchivos = bd.pedimentoFechasBusqueda(fechaNuevaDe,fechaNuevaHasta);
+
+
+
+
+
+            }
+            if (rbtFechaCliente.Checked)
+            {
+
+            }
+
+
+        }
+
+
+
+        private void cmbPatente_DropDown(object sender, EventArgs e)
+        {
+            List<string> Patentes = new List<string>
+            {
+                "1684"
+            };
+
+            cmbPatente.DataSource = Patentes;
+            datosCargados = true;
+        }
+
+        private void cmbAduana_DropDown(object sender, EventArgs e)
+        {
+            List<string> Aduana = new List<string>
+            {
+                "240"
+            };
+
+            cmbAduana.DataSource = Aduana;
+            datosCargados = true;
+        }
+
+        private void rbtPedimento_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbtPedimento.Checked)
+            {
+                // Limpia la carpeta de consultas
+                LimpiarCarpetaConsultasyZips();
+                LimpiarDataGrid();
+                MostrarOcultarControles();
+
+            }
+        }
+
+        private void rbtFecha_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbtFecha.Checked)
+            {
+                // Limpia la carpeta de consultas
+                LimpiarCarpetaConsultasyZips();
+                LimpiarDataGrid();
+                MostrarOcultarControles();
+            }
+        }
+
+        private void rbtFechaCliente_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbtFechaCliente.Checked)
+            {
+                // Limpia la carpeta de consultas
+                LimpiarCarpetaConsultasyZips();
+                LimpiarDataGrid();
+                MostrarOcultarControles();
+            }
+        }
+
+        private void LimpiarDataGrid()
+        {
+            // Limpia el DataSource de cada DataGrid
+            dgvExpedientes.DataSource = null;
+            dgvContenido.DataSource = null;
+            dgvContenidoZip.DataSource = null;
+            // Añade más líneas si tienes más DataGrids que necesiten limpiarse
+        }
+
+        private void LimpiarCarpetaConsultasyZips()
+        {
+            try
+            {
+                // Verificar si la carpeta de consultas existe
+                if (Directory.Exists(carpetaConsultas))
+                {
+                    // Obtener todos los archivos en la carpeta de consultas
+                    string[] archivos = Directory.GetFiles(carpetaConsultas);
+
+                    // Eliminar cada archivo encontrado
+                    foreach (string archivo in archivos)
+                    {
+                        File.Delete(archivo);
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                // Manejar posibles excepciones al limpiar la carpeta
+                MessageBox.Show($"Error al limpiar la carpeta de consultas: {ex.Message}");
+            }
+        }
+
+        private void MostrarOcultarControles()
+        {
+            if (rbtPedimento.Checked)
+            {
+                lblDe.Visible = false;
+                lblHasta.Visible = false;
+                cbxClientes.Visible = false;
+                dtpDe.Visible = false;
+                dtpHasta.Visible = false;
+                txtPedimento.Visible = true;
+                label2.Text = string.Empty;
+
+                // Ajusta los nombres y cantidad de controles según sea necesario
+            }
+            if (rbtFecha.Checked)
+            {
+                lblDe.Visible = true;
+                lblHasta.Visible = true;
+                cbxClientes.Visible = false;
+                dtpDe.Visible = true;
+                dtpHasta.Visible = true;
+                txtPedimento.Visible = false;
+                label2.Text= string.Empty;
+                txtPedimento.Text = string.Empty;
+               
+
+            }
+            if (rbtFechaCliente.Checked)
+            {
+                lblDe.Visible = true;
+                lblHasta.Visible = true;
+                cbxClientes.Visible = true;
+                dtpDe.Visible = true;
+                dtpHasta.Visible = true;
+                txtPedimento.Visible = false;
+                label2.Text= string.Empty;
+                txtPedimento.Text = string.Empty;
+               
+            }
+
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Mostrar un MessageBox para confirmar si el usuario desea cerrar la aplicación
+            DialogResult result = MessageBox.Show("¿Está seguro de que desea cerrar la aplicación?", "Confirmar Salida", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            // Si el usuario elige 'No', cancelar el cierre de la aplicación
+            if (result == DialogResult.No)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                LimpiarCarpetaConsultasyZips();
+            }
+        }
+
+        private void btnGuardar_Click(object sender, EventArgs e)
+        {
+            // Ruta del archivo original
+            string rutaOrigen = rutaDirecta;
+
+            // Variable para indicar si se encontró el archivo en alguna de las rutas
+            bool archivoEncontrado = false;
+
+            // Recorrer todas las rutas originales en el servidor
+            foreach (string rutaDestino in rutas)
+            {
+                // Construir la ruta completa del archivo de destino
+                string rutaArchivoDestino = Path.Combine(rutaDestino, Path.GetFileName(rutaOrigen));
+
+                // Verificar si el archivo de destino ya existe
+                if (File.Exists(rutaArchivoDestino))
+                {
+                    archivoEncontrado = true;
+
+                    // Mostrar un cuadro de diálogo de confirmación
+                    DialogResult result = MessageBox.Show("El archivo de destino ya existe en la ruta " + rutaDestino + ". ¿Deseas reemplazarlo?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    // Si el usuario elige "Sí" en el cuadro de diálogo
+                    if (result == DialogResult.Yes)
+                    {
+                        // Intentar reemplazar el archivo
+                        try
+                        {
+                            // Copiar el archivo origen a la ruta de destino
+                            File.Copy(rutaOrigen, rutaArchivoDestino, true); // Reemplazar el archivo
+                            MessageBox.Show("El archivo ha sido reemplazado correctamente en la ruta " + rutaDestino + ".", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error al intentar reemplazar el archivo en la ruta " + rutaDestino + ": " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
+                        // Salir del bucle ya que se encontró y reemplazó el archivo
+                        break;
+                    }
+                }
+            }
+
+            if (!archivoEncontrado)
+            {
+                MessageBox.Show("El archivo no se encontró en ninguna de las rutas originales en el servidor.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
     }
 
 }
