@@ -36,9 +36,9 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             }
         }
 
-        public List<string> pedimentoBusqueda(string patente, string aduana, string pedimento)
+        public string pedimentoBusqueda(string patente, string aduana, string pedimento)
         {
-            List<string> nombreArchivo = new List<string>();
+            string nombreArchivo;
             string sql = "SELECT " +
                                  "PAT_AGEN AS PATENTE, " +
                                  "ADU_DESP AS ADUANA, "  +
@@ -72,8 +72,8 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
                             string pedimentoCompleto = dataTable.Rows[0]["NUM_PEDI"].ToString();
 
                             // Concatenar los valores y agregar la extensión .zip
-                            string nombreArchivos = $"{patenteResultado} {aduanaResultado} {pedimentoCompleto}.zip";
-                            nombreArchivo.Add(nombreArchivos);
+                            nombreArchivo = $"{patenteResultado} {aduanaResultado} {pedimentoCompleto}.zip";
+                            
 
                         }
                         else
