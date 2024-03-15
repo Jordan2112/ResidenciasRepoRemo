@@ -36,12 +36,12 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             }
         }
 
-        public string pedimentoBusqueda(string patente, string aduana, string pedimento)
+        public List<string> pedimentoBusqueda(string patente, string aduana, string pedimento)
         {
-            string nombreArchivo;
+            List<string> nombreArchivo = new List<string>();
             string sql = "SELECT " +
                                  "PAT_AGEN AS PATENTE, " +
-                                 "ADU_DESP AS ADUANA, "  +
+                                 "ADU_DESP AS ADUANA, " +
                                  "NUM_PEDI AS NUM_PEDI " +
                          "FROM SAAIO_PEDIME " +
                          "WHERE " +
@@ -72,8 +72,8 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
                             string pedimentoCompleto = dataTable.Rows[0]["NUM_PEDI"].ToString();
 
                             // Concatenar los valores y agregar la extensión .zip
-                            nombreArchivo = $"{patenteResultado} {aduanaResultado} {pedimentoCompleto}.zip";
-                            
+                            string nombreArchivos = $"{patenteResultado} {aduanaResultado} {pedimentoCompleto}.zip";
+                            nombreArchivo.Add(nombreArchivos);
 
                         }
                         else
@@ -85,7 +85,7 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             }
 
             return nombreArchivo;
-           
+
         }
 
         public List<string> pedimentoFechasBusqueda(DateTime fechaDe, DateTime fechaHasta)
@@ -93,11 +93,11 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             List<string> nombresArchivos = new List<string>();
 
             string sql = "SELECT " +
-                                 "PAT_AGEN AS PATENTE, " +
-                                 "ADU_DESP AS ADUANA, " +
-                                 "NUM_PEDI AS NUM_PEDI " +
-                          "FROM SAAIO_PEDIME " +
-                          "WHERE FEC_PAGO BETWEEN @fechaDe AND @fechaHasta";
+                             "PAT_AGEN AS PATENTE, " +
+                             "ADU_DESP AS ADUANA, " +
+                             "NUM_PEDI AS NUM_PEDI " +
+                         "FROM SAAIO_PEDIME " +
+                         "WHERE FEC_PAGO BETWEEN @fechaDe AND @fechaHasta";
 
             using (FbConnection connection = new FbConnection(connectionString))
             {
@@ -129,16 +129,14 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
                                 nombresArchivos.Add(nombreArchivo);
                             }
                         }
-                        else
-                        {
-                            throw new Exception("No se encontraron resultados para los parámetros proporcionados.");
-                        }
                     }
                 }
             }
+            nombresArchivos.Sort();
 
             return nombresArchivos;
         }
+
 
 
 
