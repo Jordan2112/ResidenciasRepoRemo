@@ -30,6 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             gbxExpedientes = new GroupBox();
+            pcbCargando = new PictureBox();
             txtFiltro = new TextBox();
             label1 = new Label();
             dgvExpedientes = new DataGridView();
@@ -63,6 +64,7 @@
             rbtFecha = new RadioButton();
             rbtPedimento = new RadioButton();
             gbxExpedientes.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pcbCargando).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvExpedientes).BeginInit();
             gbxContenido.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvContenido).BeginInit();
@@ -76,6 +78,7 @@
             // 
             // gbxExpedientes
             // 
+            gbxExpedientes.Controls.Add(pcbCargando);
             gbxExpedientes.Controls.Add(txtFiltro);
             gbxExpedientes.Controls.Add(label1);
             gbxExpedientes.Controls.Add(dgvExpedientes);
@@ -86,6 +89,16 @@
             gbxExpedientes.TabIndex = 1;
             gbxExpedientes.TabStop = false;
             gbxExpedientes.Text = "EXPEDIENTES OPERATIVOS";
+            // 
+            // pcbCargando
+            // 
+            pcbCargando.Image = Properties.Resources.cargando;
+            pcbCargando.Location = new Point(6, 169);
+            pcbCargando.Name = "pcbCargando";
+            pcbCargando.Size = new Size(232, 147);
+            pcbCargando.SizeMode = PictureBoxSizeMode.CenterImage;
+            pcbCargando.TabIndex = 2;
+            pcbCargando.TabStop = false;
             // 
             // txtFiltro
             // 
@@ -468,6 +481,7 @@
             Load += Form1_Load;
             gbxExpedientes.ResumeLayout(false);
             gbxExpedientes.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pcbCargando).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvExpedientes).EndInit();
             gbxContenido.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvContenido).EndInit();
@@ -518,5 +532,6 @@
         private ComboBox cmbAduana;
         private ComboBox cmbPatente;
         private Button btnGuardar;
+        private PictureBox pcbCargando;
     }
 }

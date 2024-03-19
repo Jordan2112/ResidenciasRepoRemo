@@ -91,7 +91,7 @@ namespace LOPEZADRI_FILE_MANAGER_2
             //flag = 1;
 
             //loadExtractedList();
-
+            pcbCargando.Visible = false;
             MostrarOcultarControles();
 
             txtFiltro.Focus();
@@ -1276,46 +1276,63 @@ namespace LOPEZADRI_FILE_MANAGER_2
             return null;
         }
 
-        private void btnSearch_Click(object sender, EventArgs e)
+        public void Buscar()
         {
             BdActions bd = new BdActions(conn2);
-
-            if (rbtPedimento.Checked)
+            this.Invoke((MethodInvoker)delegate
             {
-                string pedimento = txtPedimento.Text;
-                string patente = cmbPatente.SelectedItem.ToString();
-                string aduana = cmbAduana.SelectedItem.ToString();
-
-                // Llamar al método archivoQuery para obtener el nombre del archivo
-                List<string> nombresArchivos = bd.pedimentoBusqueda(patente, aduana, pedimento);
-
-                // Buscar los archivos en las rutas especificadas
-                try
+                if (rbtPedimento.Checked)
                 {
-                    foreach (string nombreArchivo in nombresArchivos)
+                    string pedimento = txtPedimento.Text;
+                    string patente = cmbPatente.SelectedItem.ToString();
+                    string aduana = cmbAduana.SelectedItem.ToString();
+
+                    // Llamar al método archivoQuery para obtener el nombre del archivo
+                    List<string> nombresArchivos = bd.pedimentoBusqueda(patente, aduana, pedimento);
+
+                    // Buscar los archivos en las rutas especificadas
+                    try
                     {
-                        string rutaEncontrada = BuscarArchivoEnRutas(nombreArchivo, rutas);
-                        // Aquí puedes hacer lo que necesites con la ruta del archivo encontrada
-                        Debug.WriteLine($"El archivo se encontró en la siguiente ruta: {rutaEncontrada}");
-
-                        // Construir la nueva ruta donde copiaremos el archivo
-                        string nuevaRutaArchivo = Path.Combine(carpetaConsultas, nombreArchivo);
-
-                        // Verificar si el archivo ya existe en la carpeta de consultas
-                        if (!File.Exists(nuevaRutaArchivo))
+                        foreach (string nombreArchivo in nombresArchivos)
                         {
-                            try
+                            string rutaEncontrada = BuscarArchivoEnRutas(nombreArchivo, rutas);
+                            // Aquí puedes hacer lo que necesites con la ruta del archivo encontrada
+                            Debug.WriteLine($"El archivo se encontró en la siguiente ruta: {rutaEncontrada}");
+
+                            // Construir la nueva ruta donde copiaremos el archivo
+                            string nuevaRutaArchivo = Path.Combine(carpetaConsultas, nombreArchivo);
+
+                            // Verificar si el archivo ya existe en la carpeta de consultas
+                            if (!File.Exists(nuevaRutaArchivo))
                             {
-                                // Verificar si el directorio "Consultas" no existe y crearlo si es necesario
-                                if (!Directory.Exists(carpetaConsultas))
+                                try
                                 {
-                                    Directory.CreateDirectory(carpetaConsultas);
+                                    // Verificar si el directorio "Consultas" no existe y crearlo si es necesario
+                                    if (!Directory.Exists(carpetaConsultas))
+                                    {
+                                        Directory.CreateDirectory(carpetaConsultas);
+                                    }
+
+                                    // Copiar el archivo a la nueva ubicación
+                                    File.Copy(rutaEncontrada, nuevaRutaArchivo);
+
+                                    Debug.WriteLine($"Archivo copiado a la nueva ubicación: {nuevaRutaArchivo}");
+
+                                    fileHelp = FileHelper.LoadPath(folderpath);
+                                    //fileHelp = FileHelper.LoadPath(folderPath2);
+                                    flag = 1;
+
+                                    loadExtractedList();
                                 }
-
-                                // Copiar el archivo a la nueva ubicación
-                                File.Copy(rutaEncontrada, nuevaRutaArchivo);
-
-                                Debug.WriteLine($"Archivo copiado a la nueva ubicación: {nuevaRutaArchivo}");
+                                catch (Exception ex)
+                                {
+                                    // Manejar posibles excepciones al crear el directorio o copiar el archivo
+                                    MessageBox.Show($"Error al copiar el archivo: {ex.Message}");
+                                }
+                            }
+                            else
+                            {
+                                Debug.WriteLine("El archivo ya existe en la carpeta de consultas.");
 
                                 fileHelp = FileHelper.LoadPath(folderpath);
                                 //fileHelp = FileHelper.LoadPath(folderPath2);
@@ -1323,89 +1340,100 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                                 loadExtractedList();
                             }
-                            catch (Exception ex)
+                        }
+                    }
+                    catch (FileNotFoundException ex)
+                    {
+                        Debug.WriteLine("No se encontró el archivo", ex);
+                    }
+                }
+                else if (rbtFecha.Checked)
+                {
+                    DateTime fechaDe = dtpDe.Value.Date;
+                    DateTime fechaHasta = dtpHasta.Value.Date;
+
+                    DateTime fechaNuevaDe = new DateTime(fechaDe.Year, fechaDe.Month, fechaDe.Day, 0, 0, 0);
+                    DateTime fechaNuevaHasta = new DateTime(fechaHasta.Year, fechaHasta.Month, fechaHasta.Day, 23, 59, 59);
+
+                    // Obtener los nombres de archivo que necesitas buscar
+                    HashSet<string> nombresArchivosBuscar = new HashSet<string>(bd.pedimentoFechasBusqueda(fechaNuevaDe, fechaNuevaHasta));
+
+                    foreach (string nombreArchivo in nombresArchivosBuscar)
+                    {
+                        try
+                        {
+                            string rutaEncontrada = BuscarArchivoEnRutas(nombreArchivo, rutas);
+
+                            // Verificar si la ruta encontrada es nula (significa que el archivo no se encontró)
+                            if (rutaEncontrada == null)
                             {
-                                // Manejar posibles excepciones al crear el directorio o copiar el archivo
-                                MessageBox.Show($"Error al copiar el archivo: {ex.Message}");
+                                // No se encontró el archivo, continuar con el siguiente
+                                continue;
+                            }
+
+                            // Construir la nueva ruta donde copiaremos el archivo
+                            string nuevaRutaArchivo = Path.Combine(carpetaConsultas, nombreArchivo);
+
+                            // Verificar si el archivo ya existe en la carpeta de consultas
+                            if (!File.Exists(nuevaRutaArchivo))
+                            {
+                                // Copiar el archivo a la nueva ubicación
+                                File.Copy(rutaEncontrada, nuevaRutaArchivo);
+
+                                // Realizar las acciones adicionales necesarias
+                                fileHelp = FileHelper.LoadPath(folderpath);
+                                flag = 1;
+                                loadExtractedList();
+                            }
+                            else
+                            {
+                                // El archivo ya existe en la carpeta de consultas
                             }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            Debug.WriteLine("El archivo ya existe en la carpeta de consultas.");
-
-                            fileHelp = FileHelper.LoadPath(folderpath);
-                            //fileHelp = FileHelper.LoadPath(folderPath2);
-                            flag = 1;
-
-                            loadExtractedList();
+                            // Manejar cualquier excepción que ocurra durante el procesamiento del archivo
+                            Debug.WriteLine($"Error al procesar el archivo {nombreArchivo}: {ex.Message}");
                         }
                     }
                 }
-                catch (FileNotFoundException ex)
+                else if(rbtFechaCliente.Checked)
                 {
-                    Debug.WriteLine("No se encontró el archivo", ex);
+
                 }
-            }
-            if (rbtFecha.Checked)
+
+
+
+
+
+            });
+
+
+
+            // Resto del código...
+
+            // Al finalizar la búsqueda, ocultar el indicador de carga
+            this.Invoke((MethodInvoker)delegate
             {
-                DateTime fechaDe = dtpDe.Value.Date;
-                DateTime fechaHasta = dtpHasta.Value.Date;
-
-                DateTime fechaNuevaDe = new DateTime(fechaDe.Year, fechaDe.Month, fechaDe.Day, 0, 0, 0);
-                DateTime fechaNuevaHasta = new DateTime(fechaHasta.Year, fechaHasta.Month, fechaHasta.Day, 23, 59, 59);
-
-                // Obtener los nombres de archivo que necesitas buscar
-                HashSet<string> nombresArchivosBuscar = new HashSet<string>(bd.pedimentoFechasBusqueda(fechaNuevaDe, fechaNuevaHasta));
-
-                foreach (string nombreArchivo in nombresArchivosBuscar)
-                {
-                    try
-                    {
-                        string rutaEncontrada = BuscarArchivoEnRutas(nombreArchivo, rutas);
-
-                        // Verificar si la ruta encontrada es nula (significa que el archivo no se encontró)
-                        if (rutaEncontrada == null)
-                        {
-                            // No se encontró el archivo, continuar con el siguiente
-                            continue;
-                        }
-
-                        // Construir la nueva ruta donde copiaremos el archivo
-                        string nuevaRutaArchivo = Path.Combine(carpetaConsultas, nombreArchivo);
-
-                        // Verificar si el archivo ya existe en la carpeta de consultas
-                        if (!File.Exists(nuevaRutaArchivo))
-                        {
-                            // Copiar el archivo a la nueva ubicación
-                            File.Copy(rutaEncontrada, nuevaRutaArchivo);
-
-                            // Realizar las acciones adicionales necesarias
-                            fileHelp = FileHelper.LoadPath(folderpath);
-                            flag = 1;
-                            loadExtractedList();
-                        }
-                        else
-                        {
-                            // El archivo ya existe en la carpeta de consultas
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Manejar cualquier excepción que ocurra durante el procesamiento del archivo
-                        Debug.WriteLine($"Error al procesar el archivo {nombreArchivo}: {ex.Message}");
-                    }
-                }
-            }
-
-            if (rbtFechaCliente.Checked)
-            {
-
-            }
-
+                pcbCargando.Visible = false;
+            });
 
         }
 
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            pcbCargando.Visible = true;
 
+            // Crear un hilo para realizar la búsqueda
+            Thread searchThread = new Thread(() =>
+            {
+                // Realizar la búsqueda en el hilo secundario
+                Buscar();
+            });
+
+            // Iniciar el hilo de búsqueda
+            searchThread.Start();
+        }
 
         private void cmbPatente_DropDown(object sender, EventArgs e)
         {
