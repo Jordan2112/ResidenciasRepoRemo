@@ -65,10 +65,10 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             // Oculta y configura las columnas específicas del DataGridView
             dgvContenidoZip.Columns[1].Visible = false;
             dgvContenidoZip.Columns[1].HeaderText = string.Empty;
-            dgvContenidoZip.Columns[2].Visible = false;
-            dgvContenidoZip.Columns[2].HeaderText = string.Empty;
-            dgvContenidoZip.Columns[3].Visible = false;
-            dgvContenidoZip.Columns[3].HeaderText = string.Empty;
+            //dgvContenidoZip.Columns[2].Visible = false;
+            //dgvContenidoZip.Columns[2].HeaderText = string.Empty;
+            //dgvContenidoZip.Columns[3].Visible = false;
+            //dgvContenidoZip.Columns[3].HeaderText = string.Empty;
 
             foreach (DataGridViewColumn column in dgvContenidoZip.Columns)
             {
@@ -100,6 +100,12 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
             entry.ExtractToFile(Path.Combine(extractPath, entry.FullName), true);
         }
 
+        public void ExtraerZip(string rutaZip, string directorioDestino)
+        {
+            
+            // Extraer el contenido del archivo ZIP en el directorio de destino
+            ZipFile.ExtractToDirectory(rutaZip, directorioDestino);
+        }
 
     }
 }

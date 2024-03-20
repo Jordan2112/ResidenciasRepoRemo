@@ -93,9 +93,9 @@
             // pcbCargando
             // 
             pcbCargando.Image = Properties.Resources.cargando;
-            pcbCargando.Location = new Point(6, 169);
+            pcbCargando.Location = new Point(20, 165);
             pcbCargando.Name = "pcbCargando";
-            pcbCargando.Size = new Size(232, 147);
+            pcbCargando.Size = new Size(196, 136);
             pcbCargando.SizeMode = PictureBoxSizeMode.CenterImage;
             pcbCargando.TabIndex = 2;
             pcbCargando.TabStop = false;
