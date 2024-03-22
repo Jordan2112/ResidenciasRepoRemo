@@ -12,6 +12,33 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
 
         /*Metodo el cual carga los archivos de un directorio en especifico con base a una ruta 
         proporcionado en la clase de la forma*/
+        public static List<FileHelper>? LoadDirectory(string folderpath)
+        {
+            List<FileHelper> fileList = new List<FileHelper>();
+
+            string[] entries = Directory.GetFileSystemEntries(folderpath);
+
+            // Iterar sobre cada ruta de archivo o carpeta en el directorio
+            foreach (string entryPath in entries)
+            {
+                // Crear un objeto FileSystemInfo para obtener información sobre el archivo o carpeta
+                FileSystemInfo fileInfo = new FileInfo(entryPath);
+
+                // Crear un nuevo objeto FileHelper y agregarlo a la lista
+                fileList.Add(new FileHelper
+                {
+                    // Asignar el nombre del archivo o carpeta al campo 'nameFile'
+                    nameFile = fileInfo.Name,
+
+                    filePath = fileInfo.FullName
+                });
+
+
+
+            }
+            return fileList;
+
+        }
         public static List<FileHelper>? LoadPath(string folderPath)
         {
             List<FileHelper> fileList = new List<FileHelper>();
@@ -47,17 +74,7 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
                         // Si es un archivo ZIP, llamar recursivamente a LoadPath para obtener los archivos dentro del ZIP
                         fileList.AddRange(LoadPath(filePath));
                     }
-                    else
-                    {
-                        // Si es un archivo regular, agregarlo a la lista
-                        FileInfo fileInfo = new FileInfo(filePath);
-                        fileList.Add(new FileHelper
-                        {
-                            nameFile = fileInfo.Name,
-                            
-                            filePath = fileInfo.FullName
-                        });
-                    }
+                   
                 }
             }
             else

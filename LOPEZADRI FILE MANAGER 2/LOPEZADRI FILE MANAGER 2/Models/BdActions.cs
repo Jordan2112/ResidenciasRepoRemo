@@ -152,6 +152,7 @@ namespace LOPEZADRI_FILE_MANAGER_2.Models
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
                         command.CommandType = CommandType.Text;
+                        
 
                         command.Parameters.Add(new SqlParameter("@Valor1", patente));
                         command.Parameters.Add(new SqlParameter("@Valor2", aduana));
