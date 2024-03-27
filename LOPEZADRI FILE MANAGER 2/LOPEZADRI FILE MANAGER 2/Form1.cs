@@ -1703,9 +1703,6 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 // Ruta del archivo ZIP interno
                                 string innerZipPath = Path.Combine(extractionPath, label2.Text);
 
-                                // Ruta del archivo que deseas eliminar dentro del archivo ZIP interno
-                                string fileToDelete = dleteZip;
-
                                 using (ZipArchive zipArchive = ZipFile.Open(innerZipPath, ZipArchiveMode.Update))
                                 {
                                     // Buscar y eliminar el archivo dentro del ZIP
@@ -1748,6 +1745,10 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 }
 
 
+                            }
+                            else
+                            {
+                                MessageBox.Show("Selecciona el segundo zip.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
 
                            
