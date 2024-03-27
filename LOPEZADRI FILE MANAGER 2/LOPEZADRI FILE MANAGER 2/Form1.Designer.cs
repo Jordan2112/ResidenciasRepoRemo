@@ -199,6 +199,7 @@
             dgvContenidoZip.RowTemplate.Height = 25;
             dgvContenidoZip.Size = new Size(497, 410);
             dgvContenidoZip.TabIndex = 0;
+            //dgvContenidoZip.CellContentClick += dgvContenidoZip_CellContentClick;
             dgvContenidoZip.CellMouseClick += dgvContenidoZip_CellMouseClick;
             dgvContenidoZip.MouseDown += dgvContenidoZip_MouseDown;
             // 
