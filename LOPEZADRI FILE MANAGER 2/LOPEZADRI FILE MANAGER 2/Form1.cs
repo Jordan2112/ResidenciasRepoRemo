@@ -1694,6 +1694,55 @@ namespace LOPEZADRI_FILE_MANAGER_2
                                 // Ruta del ZIP principal en la carpeta principal
                                 string nestedZipPath = destinoArchivoZip;
 
+                                using (FileStream fs = new FileStream(nestedZipPath, FileMode.Open, FileAccess.ReadWrite))
+                                {
+                                    using (ZipArchive zipArchive = new ZipArchive(fs, ZipArchiveMode.Update))
+                                    {
+                                        // Ruta del archivo ZIP interno
+                                        string innerZipEntryName = label2.Text;
+
+                                        // Obtener el archivo ZIP interno
+                                        ZipArchiveEntry innerZipEntry = zipArchive.GetEntry(innerZipEntryName);
+
+                                        if (innerZipEntry != null)
+                                        {
+                                            // Crear una lista para almacenar las entradas del archivo ZIP interno
+                                            List<ZipArchiveEntry> entriesToRemove = new List<ZipArchiveEntry>();
+
+                                            // Abrir el archivo ZIP interno
+                                            using (Stream innerZipStream = innerZipEntry.Open())
+                                            using (ZipArchive innerZipArchive = new ZipArchive(innerZipStream, ZipArchiveMode.Update))
+                                            {
+                                                // Obtener todas las entradas del archivo ZIP interno
+                                                foreach (ZipArchiveEntry entry in innerZipArchive.Entries)
+                                                {
+                                                    string archivoAEliminar = dleteZip;
+                                                    if (entry.FullName == archivoAEliminar)
+                                                    {
+                                                        entriesToRemove.Add(entry);
+                                                    }
+                                                }
+
+                                                // Eliminar los archivos deseados del ZIP interno
+                                                foreach (var entryToRemove in entriesToRemove)
+                                                {
+                                                    entryToRemove.Delete();
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            MessageBox.Show("No existe tal archivo dentro del ZIP principal.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        }
+
+                                        // Guardar los cambios en el archivo ZIP principal
+                                        fs.Flush();
+                                    }
+                                }
+
+                                // Ruta del ZIP principal en la carpeta principal
+                                string rutaprueba = destinoArchivoZip;
+
                                 // Directorio donde extraeremos los archivos
                                 string extractionPath = "temp_extracted";
 
@@ -1702,60 +1751,22 @@ namespace LOPEZADRI_FILE_MANAGER_2
 
                                 // Ruta del archivo ZIP interno
                                 string innerZipPath = Path.Combine(extractionPath, label2.Text);
+                                // Otras acciones que necesites realizar después de la modificación del ZIP principal
+                                // Por ejemplo, cargar listas, mostrar mensajes, etc.
 
-                                using (ZipArchive zipArchive = ZipFile.Open(innerZipPath, ZipArchiveMode.Update))
-                                {
-                                    // Buscar y eliminar el archivo dentro del ZIP
-                                    ZipArchiveEntry? entryToRemove = zipArchive.GetEntry(dleteZip);
-                                    if (entryToRemove != null)
-                                    {
-                                        entryToRemove.Delete();
-
-                                        elementos2 = label2.Text.Split(' ');
-
-                                        // Verificar si hay suficientes elementos en la cadena
-                                        if (elementos2.Length >= 3)
-                                        {
-                                            // Obtener los valores deseados
-                                            patente = elementos2[0];
-                                            aduana = elementos2[1];
-
-                                            // Eliminar "-V.zip" del último elemento y obtener el pedimento
-                                            pedimento = elementos2[2].Replace("-V.zip", "");
-                                        }
-                                        else
-                                        {
-                                            // No hay suficientes elementos en la cadena
-                                            patente = "No hay elemento";
-                                            aduana = "No hay elemento";
-                                            pedimento = "No hay elemento";
-                                        }
-
-                                        //string zipV = patente + @" " + aduana + @" " + pedimento + @" " + @"-V";
-
-                                        //BdActions gestorBD = new BdActions(conn);
-
-                                        //gestorBD.DeleteRegistry(patente, aduana, pedimento, "Elimino", rutaEliminar, lblUsuario.Text, zipV);
-
-                                    }
-                                    else
-                                    {
-                                        MessageBox.Show("No existe tal archivo");
-                                    }
-                                }
-
-
+                                // Cargar los archivos nuevamente
+                                //fileHelp = FileHelper.LoadPath(rutaActualizar);
+                                loadExtractedList();
+                                zipHelper.SearchAndHighlightZipFiles(dgvContenido);
+                                fileHelp2 = FileHelper.LoadPath(innerZipPath);
+                                zipHelper.LoadExtractedListZip(dgvContenidoZip, fileHelp2);
                             }
                             else
                             {
-                                MessageBox.Show("Selecciona el segundo zip.", "E R R O R", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show("Selecciona el segundo zip.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
-
-                           
-
-
-                            
                         }
+
 
 
                     }
